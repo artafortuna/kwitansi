@@ -4,6 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Aplikasi Kwitansi Otomatis</title>
+    
+    <!-- Memanggil font tulisan tangan cadangan dari Google Fonts agar pasti berhasil -->
+    <link href="https://fonts.googleapis.com/css2?family=Comic+Neue:wght@700&display=swap" rel="stylesheet">
+    
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -31,7 +35,6 @@
             padding: 10px; border: 1px solid #ccc; border-radius: 5px; font-family: inherit; resize: vertical;
         }
         
-        /* Area Kanvas Input Tanda Tangan */
         .signature-container {
             display: flex; flex-direction: column; align-items: center; gap: 10px;
             border: 1px solid #ccc; padding: 10px; border-radius: 5px; background: #fafafa;
@@ -42,16 +45,22 @@
         .btn-clear { background: #dc3545; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; }
         .btn-print { background: #0056b3; color: white; border: none; padding: 12px; border-radius: 5px; cursor: pointer; font-size: 16px; font-weight: bold; width: 100%; margin-top: 15px; }
         
-        /* Area Pratinjau Kwitansi */
         .preview-section { flex: 2; min-width: 700px; overflow-x: auto; }
         .kwitansi-container { position: relative; width: 800px; display: inline-block; box-shadow: 0 4px 10px rgba(0,0,0,0.15); }
         .kwitansi-container img { width: 100%; height: auto; display: block; }
         
-        /* Font Comic Sans dan Pengaturan Posisi */
+        /* 
+           KUNCI PENGATURAN FONT: 
+           Dikunci menggunakan !important agar tidak bisa ditolak oleh browser.
+           Urutan: Coba Comic Sans lokal, jika gagal pakai Comic Neue dari internet.
+        */
         .overlay-text {
-            position: absolute; color: #1a1a1a; font-weight: bold;
-            font-family: 'Comic Sans MS', 'Comic Sans', cursive;
+            position: absolute; 
+            color: #1a1a1a; 
+            font-weight: bold;
+            font-family: 'Comic Sans MS', 'Comic Sans', 'Comic Neue', cursive !important;
         }
+        
         #textNo { top: 14.5%; left: 27%; font-size: 15px; }
         #textNama { top: 23%; left: 43%; width: 55%; font-size: 16px; }
         #textTerbilang { top: 31%; left: 40%; width: 55%; font-size: 15px; line-height: 2.1; } 
@@ -60,12 +69,10 @@
         #textTanggal { top: 68.5%; left: 74%; width: 23%; font-size: 14px; text-align: center; }
         #textPenerima { top: 88.5%; left: 74%; width: 23%; font-size: 15px; text-align: center; }
         
-        /* Posisi Tanda Tangan di Pratinjau */
         #canvasPratinjau {
             position: absolute; top: 72%; left: 71%; width: 28%; height: 16%; pointer-events: none;
         }
 
-        /* Mode Cetak */
         @media print {
             body * { visibility: hidden; }
             .kwitansi-container, .kwitansi-container * { visibility: visible; }
@@ -76,7 +83,6 @@
 <body>
 
 <div class="container">
-    <!-- Kolom Kiri: Form Input -->
     <div class="form-section">
         <h2>Data Kwitansi</h2>
         <form>
@@ -97,7 +103,6 @@
         <button class="btn-print" onclick="window.print()">Cetak PDF</button>
     </div>
 
-    <!-- Kolom Kanan: Pratinjau -->
     <div class="preview-section">
         <div class="kwitansi-container">
             <img src="1000325975.jpg" alt="Blank Kwitansi">
@@ -116,7 +121,6 @@
 </div>
 
 <script>
-    // 1. Logika Teks Real-Time
     const fields = ['No', 'Nama', 'Terbilang', 'Untuk', 'Nominal', 'Tanggal', 'Penerima'];
     fields.forEach(id => {
         document.getElementById('input' + id).addEventListener('input', function() {
@@ -124,7 +128,6 @@
         });
     });
 
-    // 2. Logika Tanda Tangan (Canvas)
     const cvsIn = document.getElementById('canvasInput');
     const ctxIn = cvsIn.getContext('2d');
     const cvsOut = document.getElementById('canvasPratinjau');
@@ -133,7 +136,6 @@
     let isDrawing = false;
     let lastX = 0, lastY = 0;
 
-    // Set pena
     ctxIn.lineWidth = 3;
     ctxIn.lineCap = 'round';
     ctxIn.lineJoin = 'round';
@@ -158,7 +160,6 @@
         lastX = x;
         lastY = y;
 
-        // Salin langsung ke pratinjau
         ctxOut.clearRect(0, 0, cvsOut.width, cvsOut.height);
         ctxOut.drawImage(cvsIn, 0, 0);
     }
@@ -172,18 +173,14 @@
 
     function endDraw() { isDrawing = false; }
 
-    // Event Mouse
     cvsIn.addEventListener('mousedown', startDraw);
     cvsIn.addEventListener('mousemove', draw);
     cvsIn.addEventListener('mouseup', endDraw);
     cvsIn.addEventListener('mouseout', endDraw);
-
-    // Event Touch (HP/Tablet)
     cvsIn.addEventListener('touchstart', startDraw, {passive: false});
     cvsIn.addEventListener('touchmove', draw, {passive: false});
     cvsIn.addEventListener('touchend', endDraw);
 
-    // Fungsi Bersihkan Kanvas
     window.clearSignature = function() {
         ctxIn.clearRect(0, 0, cvsIn.width, cvsIn.height);
         ctxOut.clearRect(0, 0, cvsOut.width, cvsOut.height);
