@@ -40,7 +40,6 @@
         }
         .form-section h2 { margin-top: 0; display: flex; justify-content: space-between; align-items: center;}
         
-        /* Tombol Bersihkan Form */
         .btn-clear-all {
             background: #ffc107; color: #212529; border: none; padding: 6px 12px;
             border-radius: 5px; cursor: pointer; font-size: 12px; font-weight: bold;
@@ -88,24 +87,24 @@
         .kwitansi-container { position: relative; width: 800px; display: inline-block; box-shadow: 0 4px 10px rgba(0,0,0,0.15); background: white; }
         .kwitansi-container img { width: 100%; height: auto; display: block; }
         
-        /* --- PENGATURAN FONT & LETAK --- */
+        /* --- PENGATURAN FONT & LETAK (Disesuaikan khusus hasil Download JPG) --- */
         .overlay-text {
             position: absolute; 
             color: #222; 
-            font-weight: bold !important; /* SEMUA DIPERTEBAL */
+            font-weight: bold !important; 
             font-family: 'Calibri', 'Arial', sans-serif !important; 
         }
         
         #textNo { top: 9.3%; left: 25.2%; font-size: 17px; } 
-        
-        /* Telah Terima & Untuk Pembayaran DINAIKKAN DIKIT */
         #textNama { top: 17.3%; left: 40.2%; width: 55%; font-size: 17px; }
-        #textTerbilang { top: 27.1%; left: 40.2%; width: 55%; font-size: 17px; line-height: 2.1; } 
-        #textUntuk { top: 35.3%; left: 40.2%; width: 53%; font-size: 17px; line-height: 2.1; } 
         
-        #textNominal { top: 80.3%; left: 29.8%; font-size: 19px; font-weight: bold; }
+        /* Uang Sejumlah & Untuk Pembayaran DINAIKKAN LEBIH BANYAK */
+        #textTerbilang { top: 25.8%; left: 40.2%; width: 55%; font-size: 17px; line-height: 2.1; } 
+        #textUntuk { top: 34.0%; left: 40.2%; width: 53%; font-size: 17px; line-height: 2.1; } 
         
-        /* Tanggal & Penerima Kiri */
+        /* Nominal Rp (Angka) DINAIKKAN DIKIT */
+        #textNominal { top: 79.1%; left: 29.8%; font-size: 19px; font-weight: bold; }
+        
         #textTanggal { top: 60.5%; left: 66.5%; width: 26%; font-size: 15px; text-align: center; }
         #textPenerima { top: 85.5%; left: 66.5%; width: 26%; font-size: 15px; text-align: center; }
         
@@ -139,7 +138,7 @@
 <div class="container">
     <div class="left-panel">
         <div class="form-section">
-            <h2>Data Kwitansi <button class="btn-clear-all" onclick="clearAllFields()">🧹 Bersihkan Form</button></h2>
+            <h2>Data Kwitansi <button class="btn-clear-all" onclick="clearAllFields()">🧹 Bersihkan</button></h2>
             <div id="editBadge" class="edit-badge">Sedang Mengedit Riwayat...</div>
             <form id="formKwitansi">
                 <label>No:</label> <input type="text" id="inputNo" placeholder="2026070001">
@@ -160,7 +159,7 @@
                 <div class="btn-row">
                     <button type="button" class="btn-action btn-save" id="btnSaveRecord" onclick="saveToHistory()">💾 Simpan Riwayat</button>
                     <!-- Tombol Download HD -->
-                    <button type="button" class="btn-action btn-download" onclick="downloadHD()" id="btnDownload">📥 Download JPG (HD)</button>
+                    <button type="button" class="btn-action btn-download" onclick="downloadHD()" id="btnDownload">📥 Download JPG</button>
                 </div>
             </div>
         </div>
@@ -370,10 +369,10 @@
         const store = tx.objectStore("riwayat");
 
         if (editModeId) {
-            data.id = editModeId; // Update id yg ada
+            data.id = editModeId;
             store.put(data);
         } else {
-            store.add(data); // Simpan baru
+            store.add(data);
         }
 
         tx.oncomplete = function() {
@@ -396,6 +395,8 @@
             const cursor = e.target.result;
             if (cursor) {
                 const data = cursor.value;
+                const itemId = cursor.primaryKey; // Menangkap ID agar closure berfungsi sempurna
+                
                 const li = document.createElement('li');
                 
                 const infoDiv = document.createElement('div');
@@ -409,13 +410,13 @@
                 const editBtn = document.createElement('button');
                 editBtn.className = 'btn-mini btn-edit';
                 editBtn.innerText = '✏️ Edit';
-                editBtn.onclick = () => loadHistoryForEdit(data, cursor.primaryKey);
+                editBtn.onclick = () => loadHistoryForEdit(data, itemId);
 
                 // Tombol Hapus
                 const delBtn = document.createElement('button');
                 delBtn.className = 'btn-mini btn-del';
                 delBtn.innerText = '🗑️ Hapus';
-                delBtn.onclick = () => deleteHistoryItem(cursor.primaryKey);
+                delBtn.onclick = () => deleteHistoryItem(itemId);
 
                 actionDiv.appendChild(editBtn);
                 actionDiv.appendChild(delBtn);
@@ -442,11 +443,11 @@
             document.getElementById('editBadge').style.display = 'block';
             document.getElementById('btnSaveRecord').innerHTML = '💾 Simpan Perubahan';
             
-            // Scroll otomatis ke atas
             window.scrollTo({ top: 0, behavior: 'smooth' });
         });
     }
 
+    // Aksi Tombol Hapus Riwayat
     function deleteHistoryItem(id) {
         showAppModal("Yakin ingin menghapus riwayat kwitansi ini permanen?", true, () => {
             const tx = db.transaction(["riwayat"], "readwrite");
@@ -464,7 +465,6 @@
 
         const targetEl = document.getElementById('kwitansiTarget');
         
-        // Menggunakan library html2canvas dengan skala tinggi (scale 3 = resolusi HD)
         html2canvas(targetEl, { 
             scale: 3, 
             useCORS: true, 
@@ -473,7 +473,7 @@
             const link = document.createElement('a');
             const noKwitansi = document.getElementById('inputNo').value || 'TanpaNomor';
             link.download = `Kwitansi_${noKwitansi}.jpg`;
-            link.href = canvas.toDataURL('image/jpeg', 1.0); // 1.0 adalah Kualitas Maksimal JPG
+            link.href = canvas.toDataURL('image/jpeg', 1.0); 
             link.click();
             
             btn.innerHTML = originalText;
