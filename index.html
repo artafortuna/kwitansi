@@ -3,67 +3,192 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Aplikasi Pembuat Kwitansi Presisi</title>
-    <link rel="stylesheet" href="styles.css">
+    <title>Aplikasi Kwitansi Otomatis</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f7f6;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 30px;
+        }
+        .form-section {
+            flex: 1;
+            min-width: 300px;
+            max-width: 400px;
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .form-section form { display: flex; flex-direction: column; gap: 12px; }
+        .form-section label { font-weight: 600; font-size: 14px; color: #333; }
+        .form-section input, .form-section textarea {
+            padding: 10px; border: 1px solid #ccc; border-radius: 5px; font-family: inherit; resize: vertical;
+        }
+        
+        /* Area Kanvas Input Tanda Tangan */
+        .signature-container {
+            display: flex; flex-direction: column; align-items: center; gap: 10px;
+            border: 1px solid #ccc; padding: 10px; border-radius: 5px; background: #fafafa;
+        }
+        #canvasInput {
+            border: 1px dashed #999; background: white; cursor: crosshair; touch-action: none;
+        }
+        .btn-clear { background: #dc3545; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; }
+        .btn-print { background: #0056b3; color: white; border: none; padding: 12px; border-radius: 5px; cursor: pointer; font-size: 16px; font-weight: bold; width: 100%; margin-top: 15px; }
+        
+        /* Area Pratinjau Kwitansi */
+        .preview-section { flex: 2; min-width: 700px; overflow-x: auto; }
+        .kwitansi-container { position: relative; width: 800px; display: inline-block; box-shadow: 0 4px 10px rgba(0,0,0,0.15); }
+        .kwitansi-container img { width: 100%; height: auto; display: block; }
+        
+        /* Font Comic Sans dan Pengaturan Posisi */
+        .overlay-text {
+            position: absolute; color: #1a1a1a; font-weight: bold;
+            font-family: 'Comic Sans MS', 'Comic Sans', cursive;
+        }
+        #textNo { top: 14.5%; left: 27%; font-size: 15px; }
+        #textNama { top: 23%; left: 43%; width: 55%; font-size: 16px; }
+        #textTerbilang { top: 31%; left: 40%; width: 55%; font-size: 15px; line-height: 2.1; } 
+        #textUntuk { top: 42.5%; left: 42%; width: 53%; font-size: 15px; line-height: 2.1; } 
+        #textNominal { top: 80.1%; left: 26.5%; font-size: 18px; }
+        #textTanggal { top: 68.5%; left: 74%; width: 23%; font-size: 14px; text-align: center; }
+        #textPenerima { top: 88.5%; left: 74%; width: 23%; font-size: 15px; text-align: center; }
+        
+        /* Posisi Tanda Tangan di Pratinjau */
+        #canvasPratinjau {
+            position: absolute; top: 72%; left: 71%; width: 28%; height: 16%; pointer-events: none;
+        }
+
+        /* Mode Cetak */
+        @media print {
+            body * { visibility: hidden; }
+            .kwitansi-container, .kwitansi-container * { visibility: visible; }
+            .kwitansi-container { position: absolute; left: 0; top: 0; box-shadow: none; }
+        }
+    </style>
 </head>
 <body>
-    <div class="container">
-        <!-- Bagian Form Input (Sisi Kiri) -->
-        <div class="form-section">
-            <h2>Data Kwitansi</h2>
-            <form id="kwitansiForm">
-                <label for="inputNo">No:</label>
-                <input type="text" id="inputNo" placeholder="Contoh: 001/INV/2026">
 
-                <label for="inputNama">Telah terima dari:</label>
-                <input type="text" id="inputNama" placeholder="Nama Pembayar">
-
-                <label for="inputTerbilang">Uang sejumlah (Terbilang):</label>
-                <textarea id="inputTerbilang" rows="2" placeholder="Satu Juta Lima Ratus Ribu Rupiah"></textarea>
-
-                <label for="inputUntuk">Untuk pembayaran:</label>
-                <textarea id="inputUntuk" rows="3" placeholder="Pembayaran sewa alat bulan Juli"></textarea>
-
-                <label for="inputNominal">Nominal Rp:</label>
-                <input type="text" id="inputNominal" placeholder="1.500.000">
-
-                <label for="inputTanggal">Tempat, Tanggal:</label>
-                <input type="text" id="inputTanggal" placeholder="Kediri, 19 Juli 2026">
-
-                <label for="inputPenerima">Nama Penerima:</label>
-                <input type="text" id="inputPenerima" placeholder="Nama Anda / Stempel">
-
-                <!-- Area Tanda Tangan di Form -->
-                <label>Tanda Tangan (Goreskan):</label>
-                <div class="signature-input-container">
-                    <canvas id="canvasSignatureInput" width="300" height="150"></canvas>
-                    <button type="button" id="btnClearSignature" class="btn-clear">Hapus Tanda Tangan</button>
-                </div>
-            </form>
-            <button class="btn-print" onclick="window.print()">Cetak / Simpan PDF</button>
-        </div>
-
-        <!-- Bagian Preview Kwitansi (Sisi Kanan) -->
-        <div class="preview-section">
-            <div id="kwitansiContainer" class="kwitansi-container">
-                <!-- Memanggil gambar yang Anda sebutkan -->
-                <img src="1000325975.jpg" alt="Blank Kwitansi" id="kwitansiBg">
-                
-                <!-- Teks yang ditumpuk di atas gambar (Hasil dengan Comic Sans) -->
-                <div id="textNo" class="overlay-text ComicSans"></div>
-                <div id="textNama" class="overlay-text ComicSans"></div>
-                <div id="textTerbilang" class="overlay-text ComicSans"></div>
-                <div id="textUntuk" class="overlay-text ComicSans"></div>
-                <div id="textNominal" class="overlay-text ComicSans"></div>
-                <div id="textTanggal" class="overlay-text ComicSans"></div>
-                <div id="textPenerima" class="overlay-text ComicSans"></div>
-                
-                <!-- Tanda Tangan yang ditumpuk di atas gambar -->
-                <canvas id="canvasSignaturePratinjau" class="overlay-signature"></canvas>
+<div class="container">
+    <!-- Kolom Kiri: Form Input -->
+    <div class="form-section">
+        <h2>Data Kwitansi</h2>
+        <form>
+            <label>No:</label> <input type="text" id="inputNo" placeholder="001/INV/2026">
+            <label>Telah terima dari:</label> <input type="text" id="inputNama" placeholder="Nama Pembayar">
+            <label>Uang sejumlah:</label> <textarea id="inputTerbilang" rows="2" placeholder="Satu Juta Rupiah"></textarea>
+            <label>Untuk pembayaran:</label> <textarea id="inputUntuk" rows="2" placeholder="Sewa alat"></textarea>
+            <label>Nominal Rp:</label> <input type="text" id="inputNominal" placeholder="1.000.000">
+            <label>Tempat, Tanggal:</label> <input type="text" id="inputTanggal" placeholder="Kediri, 19 Juli 2026">
+            <label>Nama Penerima:</label> <input type="text" id="inputPenerima" placeholder="Nama Anda">
+            
+            <label>Tanda Tangan (Goreskan di sini):</label>
+            <div class="signature-container">
+                <canvas id="canvasInput" width="300" height="150"></canvas>
+                <button type="button" class="btn-clear" onclick="clearSignature()">Hapus Tanda Tangan</button>
             </div>
-        </div>
+        </form>
+        <button class="btn-print" onclick="window.print()">Cetak PDF</button>
     </div>
 
-    <script src="script.js"></script>
+    <!-- Kolom Kanan: Pratinjau -->
+    <div class="preview-section">
+        <div class="kwitansi-container">
+            <img src="1000325975.jpg" alt="Blank Kwitansi">
+            
+            <div id="textNo" class="overlay-text"></div>
+            <div id="textNama" class="overlay-text"></div>
+            <div id="textTerbilang" class="overlay-text"></div>
+            <div id="textUntuk" class="overlay-text"></div>
+            <div id="textNominal" class="overlay-text"></div>
+            <div id="textTanggal" class="overlay-text"></div>
+            <div id="textPenerima" class="overlay-text"></div>
+            
+            <canvas id="canvasPratinjau" width="300" height="150"></canvas>
+        </div>
+    </div>
+</div>
+
+<script>
+    // 1. Logika Teks Real-Time
+    const fields = ['No', 'Nama', 'Terbilang', 'Untuk', 'Nominal', 'Tanggal', 'Penerima'];
+    fields.forEach(id => {
+        document.getElementById('input' + id).addEventListener('input', function() {
+            document.getElementById('text' + id).innerText = this.value;
+        });
+    });
+
+    // 2. Logika Tanda Tangan (Canvas)
+    const cvsIn = document.getElementById('canvasInput');
+    const ctxIn = cvsIn.getContext('2d');
+    const cvsOut = document.getElementById('canvasPratinjau');
+    const ctxOut = cvsOut.getContext('2d');
+
+    let isDrawing = false;
+    let lastX = 0, lastY = 0;
+
+    // Set pena
+    ctxIn.lineWidth = 3;
+    ctxIn.lineCap = 'round';
+    ctxIn.lineJoin = 'round';
+    ctxIn.strokeStyle = '#000';
+
+    function draw(e) {
+        if (!isDrawing) return;
+        e.preventDefault(); 
+        
+        let clientX = e.type.includes('touch') ? e.touches[0].clientX : e.clientX;
+        let clientY = e.type.includes('touch') ? e.touches[0].clientY : e.clientY;
+        
+        const rect = cvsIn.getBoundingClientRect();
+        const x = clientX - rect.left;
+        const y = clientY - rect.top;
+
+        ctxIn.beginPath();
+        ctxIn.moveTo(lastX, lastY);
+        ctxIn.lineTo(x, y);
+        ctxIn.stroke();
+        
+        lastX = x;
+        lastY = y;
+
+        // Salin langsung ke pratinjau
+        ctxOut.clearRect(0, 0, cvsOut.width, cvsOut.height);
+        ctxOut.drawImage(cvsIn, 0, 0);
+    }
+
+    function startDraw(e) {
+        isDrawing = true;
+        const rect = cvsIn.getBoundingClientRect();
+        lastX = (e.type.includes('touch') ? e.touches[0].clientX : e.clientX) - rect.left;
+        lastY = (e.type.includes('touch') ? e.touches[0].clientY : e.clientY) - rect.top;
+    }
+
+    function endDraw() { isDrawing = false; }
+
+    // Event Mouse
+    cvsIn.addEventListener('mousedown', startDraw);
+    cvsIn.addEventListener('mousemove', draw);
+    cvsIn.addEventListener('mouseup', endDraw);
+    cvsIn.addEventListener('mouseout', endDraw);
+
+    // Event Touch (HP/Tablet)
+    cvsIn.addEventListener('touchstart', startDraw, {passive: false});
+    cvsIn.addEventListener('touchmove', draw, {passive: false});
+    cvsIn.addEventListener('touchend', endDraw);
+
+    // Fungsi Bersihkan Kanvas
+    window.clearSignature = function() {
+        ctxIn.clearRect(0, 0, cvsIn.width, cvsIn.height);
+        ctxOut.clearRect(0, 0, cvsOut.width, cvsOut.height);
+    };
+</script>
+
 </body>
 </html>
