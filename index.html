@@ -87,7 +87,7 @@
         .kwitansi-container { position: relative; width: 800px; display: inline-block; box-shadow: 0 4px 10px rgba(0,0,0,0.15); background: white; }
         .kwitansi-container img { width: 100%; height: auto; display: block; }
         
-        /* --- PENGATURAN FONT & LETAK (Disesuaikan khusus hasil Download JPG) --- */
+        /* --- PENGATURAN FONT & LETAK --- */
         .overlay-text {
             position: absolute; 
             color: #222; 
@@ -98,17 +98,14 @@
         #textNo { top: 9.3%; left: 25.2%; font-size: 17px; } 
         #textNama { top: 17.3%; left: 40.2%; width: 55%; font-size: 17px; }
         
-        /* Uang Sejumlah & Untuk Pembayaran DINAIKKAN LEBIH BANYAK */
-        #textTerbilang { top: 25.8%; left: 40.2%; width: 55%; font-size: 17px; line-height: 2.1; } 
-        #textUntuk { top: 34.0%; left: 40.2%; width: 53%; font-size: 17px; line-height: 2.1; } 
+        /* UANG SEJUMLAH & UNTUK PEMBAYARAN DITURUNKAN SEDIKIT (Mencari Titik Tengah) */
+        #textTerbilang { top: 26.4%; left: 40.2%; width: 55%; font-size: 17px; line-height: 2.1; } 
+        #textUntuk { top: 34.6%; left: 40.2%; width: 53%; font-size: 17px; line-height: 2.1; } 
         
-        /* Nominal Rp (Angka) DINAIKKAN DIKIT */
         #textNominal { top: 79.1%; left: 29.8%; font-size: 19px; font-weight: bold; }
-        
         #textTanggal { top: 60.5%; left: 66.5%; width: 26%; font-size: 15px; text-align: center; }
         #textPenerima { top: 85.5%; left: 66.5%; width: 26%; font-size: 15px; text-align: center; }
         
-        /* Posisi Tanda Tangan */
         #canvasPratinjau {
             position: absolute; top: 65%; left: 70.5%; width: 18%; height: 20%; pointer-events: none;
         }
@@ -202,7 +199,7 @@
 
 <script>
     const fields = ['No', 'Nama', 'Terbilang', 'Untuk', 'Nominal', 'Tanggal', 'Penerima'];
-    let editModeId = null; // Menyimpan ID riwayat yang sedang diedit
+    let editModeId = null;
 
     // --- CUSTOM MODAL LOGIC ---
     let modalCallback = null;
@@ -298,7 +295,6 @@
         });
     });
 
-    // Fitur: Bersihkan Semua Form
     window.clearAllFields = function() {
         showAppModal("Yakin ingin mengosongkan semua isian form?", true, () => {
             fields.forEach(id => updateField(id, ''));
@@ -313,7 +309,7 @@
         document.getElementById('btnSaveRecord').innerHTML = '💾 Simpan Riwayat';
     }
 
-    // --- INDEXED DB (DRAFT & RIWAYAT) ---
+    // --- INDEXED DB ---
     let db;
     const request = indexedDB.open("KwitansiAppDB", 1);
 
@@ -348,7 +344,6 @@
         };
     }
 
-    // Simpan atau Edit Riwayat
     window.saveToHistory = function() {
         if (!db) return;
         const nama = document.getElementById('inputNama').value;
@@ -389,13 +384,13 @@
         listUl.innerHTML = ''; 
 
         const store = db.transaction(["riwayat"], "readonly").objectStore("riwayat");
-        const req = store.openCursor(null, "prev"); // Urut terbaru
+        const req = store.openCursor(null, "prev"); 
 
         req.onsuccess = function(e) {
             const cursor = e.target.result;
             if (cursor) {
                 const data = cursor.value;
-                const itemId = cursor.primaryKey; // Menangkap ID agar closure berfungsi sempurna
+                const itemId = cursor.primaryKey; 
                 
                 const li = document.createElement('li');
                 
@@ -406,13 +401,11 @@
                 const actionDiv = document.createElement('div');
                 actionDiv.className = 'history-actions';
 
-                // Tombol Edit
                 const editBtn = document.createElement('button');
                 editBtn.className = 'btn-mini btn-edit';
                 editBtn.innerText = '✏️ Edit';
                 editBtn.onclick = () => loadHistoryForEdit(data, itemId);
 
-                // Tombol Hapus
                 const delBtn = document.createElement('button');
                 delBtn.className = 'btn-mini btn-del';
                 delBtn.innerText = '🗑️ Hapus';
@@ -431,14 +424,12 @@
         };
     }
 
-    // Aksi Tombol Edit Riwayat
     function loadHistoryForEdit(data, id) {
         showAppModal("Muat data ini ke form? Isian Anda saat ini akan tertimpa.", true, () => {
             fields.forEach(fid => updateField(fid, data[fid]));
             loadSignatureImage(data.signature);
             autoSaveDraft(); 
             
-            // Ubah mode ke Edit
             editModeId = id;
             document.getElementById('editBadge').style.display = 'block';
             document.getElementById('btnSaveRecord').innerHTML = '💾 Simpan Perubahan';
@@ -447,7 +438,6 @@
         });
     }
 
-    // Aksi Tombol Hapus Riwayat
     function deleteHistoryItem(id) {
         showAppModal("Yakin ingin menghapus riwayat kwitansi ini permanen?", true, () => {
             const tx = db.transaction(["riwayat"], "readwrite");
