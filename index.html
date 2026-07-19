@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Aplikasi Pembuat Kwitansi</title>
+    <title>Aplikasi Pembuat Kwitansi Presisi</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
     <div class="container">
-        <!-- Bagian Form Input -->
+        <!-- Bagian Form Input (Sisi Kiri) -->
         <div class="form-section">
             <h2>Data Kwitansi</h2>
             <form id="kwitansiForm">
@@ -28,28 +28,38 @@
                 <input type="text" id="inputNominal" placeholder="1.500.000">
 
                 <label for="inputTanggal">Tempat, Tanggal:</label>
-                <input type="text" id="inputTanggal" placeholder="Surabaya, 19 Juli 2026">
+                <input type="text" id="inputTanggal" placeholder="Kediri, 19 Juli 2026">
 
                 <label for="inputPenerima">Nama Penerima:</label>
                 <input type="text" id="inputPenerima" placeholder="Nama Anda / Stempel">
+
+                <!-- Area Tanda Tangan di Form -->
+                <label>Tanda Tangan (Goreskan):</label>
+                <div class="signature-input-container">
+                    <canvas id="canvasSignatureInput" width="300" height="150"></canvas>
+                    <button type="button" id="btnClearSignature" class="btn-clear">Hapus Tanda Tangan</button>
+                </div>
             </form>
-            <button onclick="window.print()">Cetak / Simpan PDF</button>
+            <button class="btn-print" onclick="window.print()">Cetak / Simpan PDF</button>
         </div>
 
-        <!-- Bagian Preview Kwitansi -->
+        <!-- Bagian Preview Kwitansi (Sisi Kanan) -->
         <div class="preview-section">
             <div id="kwitansiContainer" class="kwitansi-container">
                 <!-- Memanggil gambar yang Anda sebutkan -->
-                <img src="1000325967.jpg" alt="Blank Kwitansi" id="kwitansiBg">
+                <img src="1000325975.jpg" alt="Blank Kwitansi" id="kwitansiBg">
                 
-                <!-- Teks yang akan ditumpuk di atas gambar -->
-                <div id="textNo" class="overlay-text"></div>
-                <div id="textNama" class="overlay-text"></div>
-                <div id="textTerbilang" class="overlay-text"></div>
-                <div id="textUntuk" class="overlay-text"></div>
-                <div id="textNominal" class="overlay-text"></div>
-                <div id="textTanggal" class="overlay-text"></div>
-                <div id="textPenerima" class="overlay-text"></div>
+                <!-- Teks yang ditumpuk di atas gambar (Hasil dengan Comic Sans) -->
+                <div id="textNo" class="overlay-text ComicSans"></div>
+                <div id="textNama" class="overlay-text ComicSans"></div>
+                <div id="textTerbilang" class="overlay-text ComicSans"></div>
+                <div id="textUntuk" class="overlay-text ComicSans"></div>
+                <div id="textNominal" class="overlay-text ComicSans"></div>
+                <div id="textTanggal" class="overlay-text ComicSans"></div>
+                <div id="textPenerima" class="overlay-text ComicSans"></div>
+                
+                <!-- Tanda Tangan yang ditumpuk di atas gambar -->
+                <canvas id="canvasSignaturePratinjau" class="overlay-signature"></canvas>
             </div>
         </div>
     </div>
