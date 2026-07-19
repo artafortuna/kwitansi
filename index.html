@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Aplikasi Kwitansi Presisi</title>
+    <title>Aplikasi Kwitansi Presisi & Riwayat</title>
     
     <style>
         body {
@@ -17,10 +17,18 @@
             flex-wrap: wrap;
             gap: 30px;
         }
-        .form-section {
+        
+        /* Area Kiri (Form & Riwayat) */
+        .left-panel {
             flex: 1;
             min-width: 300px;
             max-width: 400px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .form-section {
             background: white;
             padding: 25px;
             border-radius: 10px;
@@ -39,16 +47,33 @@
         #canvasInput {
             border: 1px dashed #999; background: white; cursor: crosshair; touch-action: none;
         }
-        .btn-clear { background: #dc3545; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; }
-        .btn-print { background: #0056b3; color: white; border: none; padding: 12px; border-radius: 5px; cursor: pointer; font-size: 16px; font-weight: bold; width: 100%; margin-top: 15px; }
+        .btn-clear { background: #6c757d; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; }
         
+        .btn-group { display: flex; gap: 10px; margin-top: 15px; }
+        .btn-print { background: #0056b3; color: white; border: none; padding: 12px; border-radius: 5px; cursor: pointer; font-size: 14px; font-weight: bold; flex: 1; }
+        .btn-save { background: #28a745; color: white; border: none; padding: 12px; border-radius: 5px; cursor: pointer; font-size: 14px; font-weight: bold; flex: 1; }
+        
+        /* Area Riwayat */
+        .history-section {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .history-section h3 { margin-top: 0; font-size: 16px; border-bottom: 2px solid #eee; padding-bottom: 10px;}
+        .history-list { list-style: none; padding: 0; margin: 0; max-height: 250px; overflow-y: auto; }
+        .history-list li { background: #f8f9fa; margin-bottom: 8px; padding: 10px; border-radius: 5px; border: 1px solid #ddd; display: flex; justify-content: space-between; align-items: center; transition: 0.2s;}
+        .history-list li:hover { background: #e2e6ea; }
+        .history-info { cursor: pointer; flex: 1; font-size: 13px;}
+        .history-info strong { display: block; font-size: 14px; color: #0056b3;}
+        .btn-del-history { background: #dc3545; color: white; border: none; padding: 5px 8px; border-radius: 3px; cursor: pointer; font-size: 12px; margin-left: 10px;}
+        
+        /* Area Kanan (Pratinjau) */
         .preview-section { flex: 2; min-width: 700px; overflow-x: auto; position: relative; }
         .kwitansi-container { position: relative; width: 800px; display: inline-block; box-shadow: 0 4px 10px rgba(0,0,0,0.15); transition: transform 0.3s ease; }
         .kwitansi-container img { width: 100%; height: auto; display: block; }
         
-        /* 
-           PENGATURAN FONT & LETAK MICRO-ADJUSTMENT 
-        */
+        /* --- PENGATURAN FONT & LETAK --- */
         .overlay-text {
             position: absolute; 
             color: #222; 
@@ -57,60 +82,38 @@
         }
         
         #textNo { top: 9.3%; left: 25.2%; font-size: 17px; } 
+        
+        /* Telah Terima & Uang Sejumlah SEJAJAR KIRI */
         #textNama { top: 18.0%; left: 40.2%; width: 55%; font-size: 17px; }
-        #textTerbilang { top: 27.1%; left: 39.4%; width: 55%; font-size: 17px; line-height: 2.1; } 
+        #textTerbilang { top: 27.1%; left: 40.2%; width: 55%; font-size: 17px; line-height: 2.1; } 
+        
         #textUntuk { top: 36.0%; left: 40.2%; width: 53%; font-size: 17px; line-height: 2.1; } 
         #textNominal { top: 80.3%; left: 29.8%; font-size: 19px; font-weight: bold; }
-        #textTanggal { top: 60.5%; left: 69%; width: 26%; font-size: 15px; text-align: center; }
-        #textPenerima { top: 85.5%; left: 69%; width: 26%; font-size: 15px; text-align: center; }
         
+        /* Tanggal & Penerima DIGESER KE KIRI sedikit */
+        #textTanggal { top: 60.5%; left: 66.5%; width: 26%; font-size: 15px; text-align: center; }
+        #textPenerima { top: 85.5%; left: 66.5%; width: 26%; font-size: 15px; text-align: center; }
+        
+        /* Posisi Tanda Tangan juga DIGESER KE KIRI menyesuaikan */
         #canvasPratinjau {
-            position: absolute; top: 65%; left: 73%; width: 18%; height: 20%; pointer-events: none;
+            position: absolute; top: 65%; left: 70.5%; width: 18%; height: 20%; pointer-events: none;
         }
 
-        /* 
-           GAYA UNTUK MODE FULL SCREEN PREVIEW
-        */
+        /* --- MODE FULL SCREEN --- */
         .preview-section.fullscreen-mode {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            background-color: rgba(0, 0, 0, 0.85);
-            z-index: 9999;
-            display: flex;
-            justify-content: center;
-            align-items: center;
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            background-color: rgba(0, 0, 0, 0.85); z-index: 9999;
+            display: flex; justify-content: center; align-items: center;
         }
-        
-        /* Memperbesar ukuran kwitansi sedikit saat mode full screen agar jelas */
         .preview-section.fullscreen-mode .kwitansi-container {
-            transform: scale(1.2);
-            box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+            transform: scale(1.2); box-shadow: 0 10px 30px rgba(0,0,0,0.6);
         }
-
-        /* Tombol Tutup Full Screen */
         .btn-close-fs {
-            display: none;
-            position: absolute;
-            top: 25px;
-            right: 30px;
-            background: #dc3545;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            font-size: 16px;
-            font-weight: bold;
-            border-radius: 5px;
-            cursor: pointer;
-            z-index: 10000;
+            display: none; position: absolute; top: 25px; right: 30px;
+            background: #dc3545; color: white; border: none; padding: 10px 20px;
+            font-size: 16px; font-weight: bold; border-radius: 5px; cursor: pointer; z-index: 10000;
         }
-        .btn-close-fs:hover { background: #c82333; }
-        
-        .preview-section.fullscreen-mode .btn-close-fs {
-            display: block; /* Tampilkan tombol hanya saat full screen */
-        }
+        .preview-section.fullscreen-mode .btn-close-fs { display: block; }
         
         @media print {
             body * { visibility: hidden; }
@@ -122,29 +125,39 @@
 <body>
 
 <div class="container">
-    <div class="form-section">
-        <h2>Data Kwitansi</h2>
-        <form>
-            <label>No:</label> <input type="text" id="inputNo" placeholder="2026070001">
-            <label>Telah terima dari:</label> <input type="text" id="inputNama" placeholder="Mas Ferro">
-            <label>Uang sejumlah:</label> <textarea id="inputTerbilang" rows="2" placeholder="Lima Ratus Ribu Rupiah"></textarea>
-            <label>Untuk pembayaran:</label> <textarea id="inputUntuk" rows="2" placeholder="Angsuran pengembalian pinjaman..."></textarea>
-            <label>Nominal Rp:</label> <input type="text" id="inputNominal" placeholder="500.000,00">
-            <label>Tempat, Tanggal:</label> <input type="text" id="inputTanggal" placeholder="Kediri, 19 Juli 2026">
-            <label>Nama Penerima:</label> <input type="text" id="inputPenerima" placeholder="Augustinus Sigit Prasetyo">
-            
-            <label>Tanda Tangan (Goreskan di sini):</label>
-            <div class="signature-container">
-                <canvas id="canvasInput" width="300" height="150"></canvas>
-                <button type="button" class="btn-clear" onclick="clearSignature()">Hapus Tanda Tangan</button>
+    <div class="left-panel">
+        <div class="form-section">
+            <h2>Data Kwitansi</h2>
+            <form id="formKwitansi">
+                <label>No:</label> <input type="text" id="inputNo" placeholder="2026070001">
+                <label>Telah terima dari:</label> <input type="text" id="inputNama" placeholder="Mas Ferro">
+                <label>Uang sejumlah:</label> <textarea id="inputTerbilang" rows="2" placeholder="Lima Ratus Ribu Rupiah"></textarea>
+                <label>Untuk pembayaran:</label> <textarea id="inputUntuk" rows="2" placeholder="Angsuran pengembalian pinjaman..."></textarea>
+                <label>Nominal Rp:</label> <input type="text" id="inputNominal" placeholder="500.000,00">
+                <label>Tempat, Tanggal:</label> <input type="text" id="inputTanggal" placeholder="Kediri, 19 Juli 2026">
+                <label>Nama Penerima:</label> <input type="text" id="inputPenerima" placeholder="Augustinus Sigit Prasetyo">
+                
+                <label>Tanda Tangan (Goreskan di sini):</label>
+                <div class="signature-container">
+                    <canvas id="canvasInput" width="300" height="150"></canvas>
+                    <button type="button" class="btn-clear" onclick="clearSignature()">Hapus Tanda Tangan</button>
+                </div>
+            </form>
+            <div class="btn-group">
+                <button type="button" class="btn-save" onclick="saveToHistory()">💾 Simpan Riwayat</button>
+                <button type="button" class="btn-print" onclick="openFullScreen()">🔍 Full Screen</button>
             </div>
-        </form>
-        <!-- Tombol dicustom menjadi Preview Full Screen -->
-        <button type="button" class="btn-print" onclick="openFullScreen()">Preview Full Screen</button>
+        </div>
+
+        <div class="history-section">
+            <h3>Riwayat Tersimpan</h3>
+            <ul id="historyList" class="history-list">
+                <!-- Daftar riwayat akan muncul di sini otomatis -->
+            </ul>
+        </div>
     </div>
 
     <div class="preview-section" id="previewSection">
-        <!-- Tombol Tutup disiapkan di dalam Preview Section -->
         <button type="button" class="btn-close-fs" onclick="closeFullScreen()">✖ Tutup Preview</button>
         
         <div class="kwitansi-container">
@@ -164,35 +177,70 @@
 </div>
 
 <script>
-    // Menyalin inputan secara real-time
     const fields = ['No', 'Nama', 'Terbilang', 'Untuk', 'Nominal', 'Tanggal', 'Penerima'];
-    fields.forEach(id => {
-        document.getElementById('input' + id).addEventListener('input', function() {
-            document.getElementById('text' + id).innerText = this.value;
-        });
-    });
-
-    // Setup Canvas Tanda Tangan
+    
+    // Konfigurasi Canvas
     const cvsIn = document.getElementById('canvasInput');
     const ctxIn = cvsIn.getContext('2d');
     const cvsOut = document.getElementById('canvasPratinjau');
     const ctxOut = cvsOut.getContext('2d');
-
-    let isDrawing = false;
-    let lastX = 0, lastY = 0;
 
     ctxIn.lineWidth = 2; 
     ctxIn.lineCap = 'round';
     ctxIn.lineJoin = 'round';
     ctxIn.strokeStyle = '#000000';
 
+    // --- SETUP INDEXED DB UNTUK PENYIMPANAN OTOMATIS & RIWAYAT ---
+    let db;
+    const request = indexedDB.open("KwitansiAppDB", 1);
+
+    request.onupgradeneeded = function(event) {
+        db = event.target.result;
+        // Tabel Draft Otomatis
+        if (!db.objectStoreNames.contains("draft")) {
+            db.createObjectStore("draft", { keyPath: "id" });
+        }
+        // Tabel Riwayat Kwitansi
+        if (!db.objectStoreNames.contains("riwayat")) {
+            db.createObjectStore("riwayat", { keyPath: "id", autoIncrement: true });
+        }
+    };
+
+    request.onsuccess = function(event) {
+        db = event.target.result;
+        loadDraft(); // Panggil data yang belum tersimpan (otomatis) saat dibuka
+        loadHistoryList(); // Panggil list riwayat
+    };
+
+    request.onerror = function(event) {
+        console.error("Gagal mengakses database browser", event);
+    };
+
+    // Fungsi untuk memperbarui teks di pratinjau & form
+    function updateField(id, value) {
+        const inputEl = document.getElementById('input' + id);
+        const textEl = document.getElementById('text' + id);
+        if(inputEl) inputEl.value = value || '';
+        if(textEl) textEl.innerText = value || '';
+    }
+
+    // Listener Ketikan Real-time + Auto Save
+    fields.forEach(id => {
+        document.getElementById('input' + id).addEventListener('input', function() {
+            document.getElementById('text' + id).innerText = this.value;
+            autoSaveDraft();
+        });
+    });
+
+    // --- FUNGSI CANVAS & MENGGAMBAR ---
+    let isDrawing = false;
+    let lastX = 0, lastY = 0;
+
     function draw(e) {
         if (!isDrawing) return;
         e.preventDefault(); 
-        
         let clientX = e.type.includes('touch') ? e.touches[0].clientX : e.clientX;
         let clientY = e.type.includes('touch') ? e.touches[0].clientY : e.clientY;
-        
         const rect = cvsIn.getBoundingClientRect();
         const x = clientX - rect.left;
         const y = clientY - rect.top;
@@ -202,8 +250,7 @@
         ctxIn.lineTo(x, y);
         ctxIn.stroke();
         
-        lastX = x;
-        lastY = y;
+        lastX = x; lastY = y;
 
         ctxOut.clearRect(0, 0, cvsOut.width, cvsOut.height);
         ctxOut.drawImage(cvsIn, 0, 0);
@@ -216,7 +263,12 @@
         lastY = (e.type.includes('touch') ? e.touches[0].clientY : e.clientY) - rect.top;
     }
 
-    function endDraw() { isDrawing = false; }
+    function endDraw() { 
+        if(isDrawing){
+            isDrawing = false;
+            autoSaveDraft(); // Simpan draft setelah goresan selesai
+        }
+    }
 
     cvsIn.addEventListener('mousedown', startDraw);
     cvsIn.addEventListener('mousemove', draw);
@@ -229,22 +281,139 @@
     window.clearSignature = function() {
         ctxIn.clearRect(0, 0, cvsIn.width, cvsIn.height);
         ctxOut.clearRect(0, 0, cvsOut.width, cvsOut.height);
+        autoSaveDraft();
     };
 
-    // FITUR FULL SCREEN
-    function openFullScreen() {
+    // Fungsi memuat Tanda Tangan dari string (Base64)
+    function loadSignatureImage(dataURL) {
+        ctxIn.clearRect(0, 0, cvsIn.width, cvsIn.height);
+        ctxOut.clearRect(0, 0, cvsOut.width, cvsOut.height);
+        if(!dataURL) return;
+        const img = new Image();
+        img.onload = () => {
+            ctxIn.drawImage(img, 0, 0);
+            ctxOut.drawImage(img, 0, 0);
+        };
+        img.src = dataURL;
+    }
+
+    // --- FUNGSI INDEXED DB (DRAFT & RIWAYAT) ---
+
+    // 1. Simpan Otomatis (Draft Sementara agar tidak hilang saat refresh)
+    function autoSaveDraft() {
+        if (!db) return;
+        const data = { id: 'current', signature: cvsIn.toDataURL() };
+        fields.forEach(id => { data[id] = document.getElementById('input' + id).value; });
+        
+        const tx = db.transaction(["draft"], "readwrite");
+        tx.objectStore("draft").put(data);
+    }
+
+    // 2. Muat Draft Saat Buka Aplikasi
+    function loadDraft() {
+        if (!db) return;
+        const tx = db.transaction(["draft"], "readonly");
+        const request = tx.objectStore("draft").get('current');
+        
+        request.onsuccess = function(e) {
+            const data = e.target.result;
+            if (data) {
+                fields.forEach(id => updateField(id, data[id]));
+                loadSignatureImage(data.signature);
+            }
+        };
+    }
+
+    // 3. Simpan Ke Tabel Riwayat
+    window.saveToHistory = function() {
+        if (!db) return;
+        const nama = document.getElementById('inputNama').value;
+        const nominal = document.getElementById('inputNominal').value;
+        
+        if(!nama && !nominal) {
+            alert("Isi minimal Nama atau Nominal untuk menyimpan riwayat.");
+            return;
+        }
+
+        const data = { 
+            tanggal_simpan: new Date().toLocaleString('id-ID'),
+            signature: cvsIn.toDataURL() 
+        };
+        fields.forEach(id => { data[id] = document.getElementById('input' + id).value; });
+
+        const tx = db.transaction(["riwayat"], "readwrite");
+        tx.objectStore("riwayat").add(data);
+        tx.oncomplete = function() {
+            alert("Kwitansi berhasil disimpan ke Riwayat!");
+            loadHistoryList();
+        };
+    };
+
+    // 4. Tampilkan Daftar Riwayat
+    function loadHistoryList() {
+        if (!db) return;
+        const listUl = document.getElementById('historyList');
+        listUl.innerHTML = ''; 
+
+        const tx = db.transaction(["riwayat"], "readonly");
+        const store = tx.objectStore("riwayat");
+        const request = store.openCursor(null, "prev"); // Urutan dari terbaru
+
+        request.onsuccess = function(e) {
+            const cursor = e.target.result;
+            if (cursor) {
+                const data = cursor.value;
+                const li = document.createElement('li');
+                
+                const infoDiv = document.createElement('div');
+                infoDiv.className = 'history-info';
+                infoDiv.innerHTML = `<strong>${data.Nama || 'Tanpa Nama'} - Rp ${data.Nominal || '0'}</strong> 
+                                     Tgl: ${data.tanggal_simpan}`;
+                infoDiv.onclick = () => loadHistoryItem(data);
+
+                const delBtn = document.createElement('button');
+                delBtn.className = 'btn-del-history';
+                delBtn.innerText = 'Hapus';
+                delBtn.onclick = () => deleteHistoryItem(cursor.primaryKey);
+
+                li.appendChild(infoDiv);
+                li.appendChild(delBtn);
+                listUl.appendChild(li);
+                
+                cursor.continue();
+            } else if (listUl.innerHTML === '') {
+                listUl.innerHTML = '<li style="color:#777; text-align:center; display:block;">Belum ada riwayat tersimpan</li>';
+            }
+        };
+    }
+
+    // 5. Muat Satu Riwayat ke Form
+    function loadHistoryItem(data) {
+        if(confirm("Muat riwayat ini ke form? Inputan saat ini akan tertimpa.")){
+            fields.forEach(id => updateField(id, data[id]));
+            loadSignatureImage(data.signature);
+            autoSaveDraft(); // Update draft dengan data riwayat yang dipanggil
+        }
+    }
+
+    // 6. Hapus Riwayat
+    function deleteHistoryItem(id) {
+        if(confirm("Yakin ingin menghapus riwayat ini?")){
+            const tx = db.transaction(["riwayat"], "readwrite");
+            tx.objectStore("riwayat").delete(id);
+            tx.oncomplete = function() { loadHistoryList(); };
+        }
+    }
+
+    // --- FITUR FULL SCREEN ---
+    window.openFullScreen = function() {
         document.getElementById('previewSection').classList.add('fullscreen-mode');
     }
-
-    function closeFullScreen() {
+    window.closeFullScreen = function() {
         document.getElementById('previewSection').classList.remove('fullscreen-mode');
     }
-
-    // Menutup Full Screen ketika tombol ESC ditekan
     document.addEventListener('keydown', function(event) {
-        if (event.key === "Escape") {
-            closeFullScreen();
-        }
+        if (event.key === "Escape") closeFullScreen();
     });
 </script>
 
