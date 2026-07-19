@@ -5,6 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Aplikasi Kwitansi Pro - HD & Riwayat</title>
     
+    <!-- Konfigurasi PWA & Favicon -->
+    <meta name="theme-color" content="#f4f7f6">
+    <link rel="icon" type="image/png" href="logo.png">
+    <link rel="apple-touch-icon" href="logo.png">
+    <link rel="manifest" href="manifest.json">
+
     <!-- Library untuk mengubah pratinjau menjadi Gambar HD -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
@@ -93,40 +99,25 @@
             color: #222; 
             font-weight: bold !important; 
             font-family: 'Calibri', 'Arial', sans-serif !important; 
-            
-            /* TINGGIKAN BENTUK HURUF 15% (Memanjang ke Atas) */
             transform: scaleY(1.15); 
-            
-            /* Kaki huruf berpijak di bawah agar baseline tidak rusak */
             transform-origin: left bottom; 
         }
         
-        /* Ukuran font dasar dinaikkan 1px agar lebih tegas */
         #textNo { top: 9.5%; left: 25.2%; font-size: 18px; } 
-        
-        /* TELAH TERIMA DARI: Dinaikkan */
         #textNama { top: 17.5%; left: 40.2%; width: 55%; font-size: 18px; }
-        
-        /* TERBILANG: Tetap menyesuaikan bentuk tinggi */
         #textTerbilang { top: 27.5%; left: 40.2%; width: 55%; font-size: 18px; line-height: 1.95; } 
-        
-        /* UNTUK PEMBAYARAN: Diturunkan "duikit" */
         #textUntuk { top: 36%; left: 40.2%; width: 53%; font-size: 18px; line-height: 1.95; } 
-        
         #textNominal { top: 80.0%; left: 29.8%; font-size: 20px; font-weight: bold; }
         
-        /* TANGGAL: Dinaikkan dikit */
         #textTanggal { 
             top: 60%; left: 66.5%; width: 26%; font-size: 16px; text-align: center; 
-            transform-origin: center bottom; /* khusus center alignment */
+            transform-origin: center bottom; 
         }
-        
         #textPenerima { 
             top: 85.5%; left: 66.5%; width: 26%; font-size: 16px; text-align: center; 
             transform-origin: center bottom; 
         }
         
-        /* Posisi Tanda Tangan */
         #canvasPratinjau {
             position: absolute; top: 65%; left: 70.5%; width: 18%; height: 20%; pointer-events: none;
         }
@@ -176,7 +167,6 @@
             <div class="btn-group">
                 <div class="btn-row">
                     <button type="button" class="btn-action btn-save" id="btnSaveRecord" onclick="saveToHistory()">💾 Simpan Riwayat</button>
-                    <!-- Tombol Download HD -->
                     <button type="button" class="btn-action btn-download" onclick="downloadHD()" id="btnDownload">📥 Download JPG</button>
                 </div>
             </div>
@@ -494,6 +484,19 @@
             showAppModal("Gagal mengekspor gambar.", false, null);
             btn.innerHTML = originalText;
             btn.disabled = false;
+        });
+    }
+
+    // --- REGISTRASI SERVICE WORKER UNTUK PWA ---
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+            navigator.serviceWorker.register('sw.js')
+            .then(registration => {
+                console.log('Service Worker berhasil didaftarkan dengan scope:', registration.scope);
+            })
+            .catch(err => {
+                console.log('Pendaftaran Service Worker gagal:', err);
+            });
         });
     }
 </script>
