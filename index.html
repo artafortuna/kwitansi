@@ -3,8 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Aplikasi Kwitansi Presisi & Riwayat</title>
+    <title>Aplikasi Kwitansi Pro - HD & Riwayat</title>
     
+    <!-- Library untuk mengubah pratinjau menjadi Gambar HD -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -21,8 +24,8 @@
         /* Area Kiri (Form & Riwayat) */
         .left-panel {
             flex: 1;
-            min-width: 300px;
-            max-width: 400px;
+            min-width: 320px;
+            max-width: 450px;
             display: flex;
             flex-direction: column;
             gap: 20px;
@@ -33,7 +36,17 @@
             padding: 25px;
             border-radius: 10px;
             box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            position: relative;
         }
+        .form-section h2 { margin-top: 0; display: flex; justify-content: space-between; align-items: center;}
+        
+        /* Tombol Bersihkan Form */
+        .btn-clear-all {
+            background: #ffc107; color: #212529; border: none; padding: 6px 12px;
+            border-radius: 5px; cursor: pointer; font-size: 12px; font-weight: bold;
+        }
+        .btn-clear-all:hover { background: #e0a800; }
+
         .form-section form { display: flex; flex-direction: column; gap: 12px; }
         .form-section label { font-weight: 600; font-size: 14px; color: #333; }
         .form-section input, .form-section textarea {
@@ -45,81 +58,80 @@
             border: 1px solid #ccc; padding: 10px; border-radius: 5px; background: #fafafa;
         }
         #canvasInput {
-            border: 1px dashed #999; background: white; cursor: crosshair; touch-action: none;
+            border: 1px dashed #999; background: white; cursor: crosshair; touch-action: none; width: 100%; max-width: 300px;
         }
-        .btn-clear { background: #6c757d; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; }
+        .btn-clear-sig { background: #6c757d; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 12px;}
         
-        .btn-group { display: flex; gap: 10px; margin-top: 15px; }
-        .btn-print { background: #0056b3; color: white; border: none; padding: 12px; border-radius: 5px; cursor: pointer; font-size: 14px; font-weight: bold; flex: 1; }
-        .btn-save { background: #28a745; color: white; border: none; padding: 12px; border-radius: 5px; cursor: pointer; font-size: 14px; font-weight: bold; flex: 1; }
+        .btn-group { display: flex; flex-direction: column; gap: 10px; margin-top: 20px; }
+        .btn-row { display: flex; gap: 10px; }
+        .btn-action { color: white; border: none; padding: 12px; border-radius: 5px; cursor: pointer; font-size: 14px; font-weight: bold; flex: 1; display: flex; justify-content: center; align-items: center; gap: 5px;}
+        .btn-save { background: #28a745; } .btn-save:hover { background: #218838; }
+        .btn-download { background: #007bff; } .btn-download:hover { background: #0069d9; }
+        .edit-badge { background: #17a2b8; color: white; padding: 4px 8px; border-radius: 4px; font-size: 11px; display: none; align-self: flex-start; margin-bottom: 5px;}
         
         /* Area Riwayat */
         .history-section {
-            background: white;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            background: white; padding: 20px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);
         }
         .history-section h3 { margin-top: 0; font-size: 16px; border-bottom: 2px solid #eee; padding-bottom: 10px;}
         .history-list { list-style: none; padding: 0; margin: 0; max-height: 250px; overflow-y: auto; }
-        .history-list li { background: #f8f9fa; margin-bottom: 8px; padding: 10px; border-radius: 5px; border: 1px solid #ddd; display: flex; justify-content: space-between; align-items: center; transition: 0.2s;}
-        .history-list li:hover { background: #e2e6ea; }
-        .history-info { cursor: pointer; flex: 1; font-size: 13px;}
+        .history-list li { background: #f8f9fa; margin-bottom: 8px; padding: 10px; border-radius: 5px; border: 1px solid #ddd; display: flex; flex-direction: column; gap: 8px;}
+        .history-info { font-size: 13px; color: #555;}
         .history-info strong { display: block; font-size: 14px; color: #0056b3;}
-        .btn-del-history { background: #dc3545; color: white; border: none; padding: 5px 8px; border-radius: 3px; cursor: pointer; font-size: 12px; margin-left: 10px;}
+        .history-actions { display: flex; gap: 5px; justify-content: flex-end;}
+        .btn-mini { padding: 5px 10px; border-radius: 3px; cursor: pointer; font-size: 11px; border: none; color: white; font-weight: bold;}
+        .btn-edit { background: #ffc107; color: #212529; }
+        .btn-del { background: #dc3545; }
         
         /* Area Kanan (Pratinjau) */
         .preview-section { flex: 2; min-width: 700px; overflow-x: auto; position: relative; }
-        .kwitansi-container { position: relative; width: 800px; display: inline-block; box-shadow: 0 4px 10px rgba(0,0,0,0.15); transition: transform 0.3s ease; }
+        .kwitansi-container { position: relative; width: 800px; display: inline-block; box-shadow: 0 4px 10px rgba(0,0,0,0.15); background: white; }
         .kwitansi-container img { width: 100%; height: auto; display: block; }
         
         /* --- PENGATURAN FONT & LETAK --- */
         .overlay-text {
             position: absolute; 
             color: #222; 
-            font-weight: 500; 
+            font-weight: bold !important; /* SEMUA DIPERTEBAL */
             font-family: 'Calibri', 'Arial', sans-serif !important; 
         }
         
         #textNo { top: 9.3%; left: 25.2%; font-size: 17px; } 
         
-        /* Telah Terima & Uang Sejumlah SEJAJAR KIRI */
-        #textNama { top: 18.0%; left: 40.2%; width: 55%; font-size: 17px; }
+        /* Telah Terima & Untuk Pembayaran DINAIKKAN DIKIT */
+        #textNama { top: 17.3%; left: 40.2%; width: 55%; font-size: 17px; }
         #textTerbilang { top: 27.1%; left: 40.2%; width: 55%; font-size: 17px; line-height: 2.1; } 
+        #textUntuk { top: 35.3%; left: 40.2%; width: 53%; font-size: 17px; line-height: 2.1; } 
         
-        #textUntuk { top: 36.0%; left: 40.2%; width: 53%; font-size: 17px; line-height: 2.1; } 
         #textNominal { top: 80.3%; left: 29.8%; font-size: 19px; font-weight: bold; }
         
-        /* Tanggal & Penerima DIGESER KE KIRI sedikit */
+        /* Tanggal & Penerima Kiri */
         #textTanggal { top: 60.5%; left: 66.5%; width: 26%; font-size: 15px; text-align: center; }
         #textPenerima { top: 85.5%; left: 66.5%; width: 26%; font-size: 15px; text-align: center; }
         
-        /* Posisi Tanda Tangan juga DIGESER KE KIRI menyesuaikan */
+        /* Posisi Tanda Tangan */
         #canvasPratinjau {
             position: absolute; top: 65%; left: 70.5%; width: 18%; height: 20%; pointer-events: none;
         }
 
-        /* --- MODE FULL SCREEN --- */
-        .preview-section.fullscreen-mode {
-            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-            background-color: rgba(0, 0, 0, 0.85); z-index: 9999;
-            display: flex; justify-content: center; align-items: center;
+        /* --- CUSTOM MODAL POPUP --- */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.6);
+            display: none; align-items: center; justify-content: center; z-index: 9999; backdrop-filter: blur(3px);
+            opacity: 0; transition: opacity 0.2s ease;
         }
-        .preview-section.fullscreen-mode .kwitansi-container {
-            transform: scale(1.2); box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+        .modal-box {
+            background: white; padding: 25px; border-radius: 12px; width: 90%; max-width: 350px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3); text-align: center; transform: translateY(20px); transition: transform 0.2s ease;
         }
-        .btn-close-fs {
-            display: none; position: absolute; top: 25px; right: 30px;
-            background: #dc3545; color: white; border: none; padding: 10px 20px;
-            font-size: 16px; font-weight: bold; border-radius: 5px; cursor: pointer; z-index: 10000;
-        }
-        .preview-section.fullscreen-mode .btn-close-fs { display: block; }
-        
-        @media print {
-            body * { visibility: hidden; }
-            .kwitansi-container, .kwitansi-container * { visibility: visible; }
-            .kwitansi-container { position: absolute; left: 0; top: 0; box-shadow: none; transform: none; }
-        }
+        .modal-overlay.active { opacity: 1; display: flex; }
+        .modal-overlay.active .modal-box { transform: translateY(0); }
+        .modal-msg { margin: 0 0 20px 0; font-size: 15px; color: #333; line-height: 1.5; }
+        .modal-btns { display: flex; gap: 10px; justify-content: center; }
+        .btn-modal { padding: 10px 20px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 14px; flex: 1;}
+        .btn-modal-cancel { background: #e9ecef; color: #495057; } .btn-modal-cancel:hover { background: #dde2e6; }
+        .btn-modal-ok { background: #0056b3; color: white; } .btn-modal-ok:hover { background: #004494; }
+
     </style>
 </head>
 <body>
@@ -127,7 +139,8 @@
 <div class="container">
     <div class="left-panel">
         <div class="form-section">
-            <h2>Data Kwitansi</h2>
+            <h2>Data Kwitansi <button class="btn-clear-all" onclick="clearAllFields()">🧹 Bersihkan Form</button></h2>
+            <div id="editBadge" class="edit-badge">Sedang Mengedit Riwayat...</div>
             <form id="formKwitansi">
                 <label>No:</label> <input type="text" id="inputNo" placeholder="2026070001">
                 <label>Telah terima dari:</label> <input type="text" id="inputNama" placeholder="Mas Ferro">
@@ -137,31 +150,32 @@
                 <label>Tempat, Tanggal:</label> <input type="text" id="inputTanggal" placeholder="Kediri, 19 Juli 2026">
                 <label>Nama Penerima:</label> <input type="text" id="inputPenerima" placeholder="Augustinus Sigit Prasetyo">
                 
-                <label>Tanda Tangan (Goreskan di sini):</label>
+                <label>Tanda Tangan:</label>
                 <div class="signature-container">
                     <canvas id="canvasInput" width="300" height="150"></canvas>
-                    <button type="button" class="btn-clear" onclick="clearSignature()">Hapus Tanda Tangan</button>
+                    <button type="button" class="btn-clear-sig" onclick="clearSignature()">Hapus Tanda Tangan</button>
                 </div>
             </form>
             <div class="btn-group">
-                <button type="button" class="btn-save" onclick="saveToHistory()">💾 Simpan Riwayat</button>
-                <button type="button" class="btn-print" onclick="openFullScreen()">🔍 Full Screen</button>
+                <div class="btn-row">
+                    <button type="button" class="btn-action btn-save" id="btnSaveRecord" onclick="saveToHistory()">💾 Simpan Riwayat</button>
+                    <!-- Tombol Download HD -->
+                    <button type="button" class="btn-action btn-download" onclick="downloadHD()" id="btnDownload">📥 Download JPG (HD)</button>
+                </div>
             </div>
         </div>
 
         <div class="history-section">
             <h3>Riwayat Tersimpan</h3>
             <ul id="historyList" class="history-list">
-                <!-- Daftar riwayat akan muncul di sini otomatis -->
+                <!-- Data Riwayat DB -->
             </ul>
         </div>
     </div>
 
     <div class="preview-section" id="previewSection">
-        <button type="button" class="btn-close-fs" onclick="closeFullScreen()">✖ Tutup Preview</button>
-        
-        <div class="kwitansi-container">
-            <img src="1000325927.jpg" alt="Blank Kwitansi">
+        <div class="kwitansi-container" id="kwitansiTarget">
+            <img src="1000325927.jpg" alt="Blank Kwitansi" id="kwitansiBg">
             
             <div id="textNo" class="overlay-text"></div>
             <div id="textNama" class="overlay-text"></div>
@@ -176,10 +190,38 @@
     </div>
 </div>
 
+<!-- Custom Modal UI -->
+<div class="modal-overlay" id="customModal">
+    <div class="modal-box">
+        <p class="modal-msg" id="modalMsg">Pesan</p>
+        <div class="modal-btns">
+            <button class="btn-modal btn-modal-cancel" id="modalBtnCancel">Batal</button>
+            <button class="btn-modal btn-modal-ok" id="modalBtnOk">OK</button>
+        </div>
+    </div>
+</div>
+
 <script>
     const fields = ['No', 'Nama', 'Terbilang', 'Untuk', 'Nominal', 'Tanggal', 'Penerima'];
+    let editModeId = null; // Menyimpan ID riwayat yang sedang diedit
+
+    // --- CUSTOM MODAL LOGIC ---
+    let modalCallback = null;
+    const modal = document.getElementById('customModal');
     
-    // Konfigurasi Canvas
+    function showAppModal(message, isConfirm, callback) {
+        document.getElementById('modalMsg').innerText = message;
+        document.getElementById('modalBtnCancel').style.display = isConfirm ? 'block' : 'none';
+        modalCallback = callback;
+        modal.classList.add('active');
+    }
+    document.getElementById('modalBtnCancel').onclick = () => { modal.classList.remove('active'); };
+    document.getElementById('modalBtnOk').onclick = () => { 
+        modal.classList.remove('active'); 
+        if(modalCallback) modalCallback(); 
+    };
+
+    // --- CANVAS TANDA TANGAN ---
     const cvsIn = document.getElementById('canvasInput');
     const ctxIn = cvsIn.getContext('2d');
     const cvsOut = document.getElementById('canvasPratinjau');
@@ -190,51 +232,7 @@
     ctxIn.lineJoin = 'round';
     ctxIn.strokeStyle = '#000000';
 
-    // --- SETUP INDEXED DB UNTUK PENYIMPANAN OTOMATIS & RIWAYAT ---
-    let db;
-    const request = indexedDB.open("KwitansiAppDB", 1);
-
-    request.onupgradeneeded = function(event) {
-        db = event.target.result;
-        // Tabel Draft Otomatis
-        if (!db.objectStoreNames.contains("draft")) {
-            db.createObjectStore("draft", { keyPath: "id" });
-        }
-        // Tabel Riwayat Kwitansi
-        if (!db.objectStoreNames.contains("riwayat")) {
-            db.createObjectStore("riwayat", { keyPath: "id", autoIncrement: true });
-        }
-    };
-
-    request.onsuccess = function(event) {
-        db = event.target.result;
-        loadDraft(); // Panggil data yang belum tersimpan (otomatis) saat dibuka
-        loadHistoryList(); // Panggil list riwayat
-    };
-
-    request.onerror = function(event) {
-        console.error("Gagal mengakses database browser", event);
-    };
-
-    // Fungsi untuk memperbarui teks di pratinjau & form
-    function updateField(id, value) {
-        const inputEl = document.getElementById('input' + id);
-        const textEl = document.getElementById('text' + id);
-        if(inputEl) inputEl.value = value || '';
-        if(textEl) textEl.innerText = value || '';
-    }
-
-    // Listener Ketikan Real-time + Auto Save
-    fields.forEach(id => {
-        document.getElementById('input' + id).addEventListener('input', function() {
-            document.getElementById('text' + id).innerText = this.value;
-            autoSaveDraft();
-        });
-    });
-
-    // --- FUNGSI CANVAS & MENGGAMBAR ---
-    let isDrawing = false;
-    let lastX = 0, lastY = 0;
+    let isDrawing = false, lastX = 0, lastY = 0;
 
     function draw(e) {
         if (!isDrawing) return;
@@ -242,15 +240,13 @@
         let clientX = e.type.includes('touch') ? e.touches[0].clientX : e.clientX;
         let clientY = e.type.includes('touch') ? e.touches[0].clientY : e.clientY;
         const rect = cvsIn.getBoundingClientRect();
-        const x = clientX - rect.left;
-        const y = clientY - rect.top;
-
+        
         ctxIn.beginPath();
         ctxIn.moveTo(lastX, lastY);
-        ctxIn.lineTo(x, y);
+        ctxIn.lineTo(clientX - rect.left, clientY - rect.top);
         ctxIn.stroke();
         
-        lastX = x; lastY = y;
+        lastX = clientX - rect.left; lastY = clientY - rect.top;
 
         ctxOut.clearRect(0, 0, cvsOut.width, cvsOut.height);
         ctxOut.drawImage(cvsIn, 0, 0);
@@ -263,12 +259,7 @@
         lastY = (e.type.includes('touch') ? e.touches[0].clientY : e.clientY) - rect.top;
     }
 
-    function endDraw() { 
-        if(isDrawing){
-            isDrawing = false;
-            autoSaveDraft(); // Simpan draft setelah goresan selesai
-        }
-    }
+    function endDraw() { if(isDrawing) { isDrawing = false; autoSaveDraft(); } }
 
     cvsIn.addEventListener('mousedown', startDraw);
     cvsIn.addEventListener('mousemove', draw);
@@ -284,38 +275,72 @@
         autoSaveDraft();
     };
 
-    // Fungsi memuat Tanda Tangan dari string (Base64)
     function loadSignatureImage(dataURL) {
         ctxIn.clearRect(0, 0, cvsIn.width, cvsIn.height);
         ctxOut.clearRect(0, 0, cvsOut.width, cvsOut.height);
         if(!dataURL) return;
         const img = new Image();
-        img.onload = () => {
-            ctxIn.drawImage(img, 0, 0);
-            ctxOut.drawImage(img, 0, 0);
-        };
+        img.onload = () => { ctxIn.drawImage(img, 0, 0); ctxOut.drawImage(img, 0, 0); };
         img.src = dataURL;
     }
 
-    // --- FUNGSI INDEXED DB (DRAFT & RIWAYAT) ---
+    // --- LOGIKA INPUT & FORM ---
+    function updateField(id, value) {
+        const inputEl = document.getElementById('input' + id);
+        const textEl = document.getElementById('text' + id);
+        if(inputEl) inputEl.value = value || '';
+        if(textEl) textEl.innerText = value || '';
+    }
 
-    // 1. Simpan Otomatis (Draft Sementara agar tidak hilang saat refresh)
+    fields.forEach(id => {
+        document.getElementById('input' + id).addEventListener('input', function() {
+            document.getElementById('text' + id).innerText = this.value;
+            autoSaveDraft();
+        });
+    });
+
+    // Fitur: Bersihkan Semua Form
+    window.clearAllFields = function() {
+        showAppModal("Yakin ingin mengosongkan semua isian form?", true, () => {
+            fields.forEach(id => updateField(id, ''));
+            clearSignature();
+            cancelEditMode();
+        });
+    };
+
+    function cancelEditMode() {
+        editModeId = null;
+        document.getElementById('editBadge').style.display = 'none';
+        document.getElementById('btnSaveRecord').innerHTML = '💾 Simpan Riwayat';
+    }
+
+    // --- INDEXED DB (DRAFT & RIWAYAT) ---
+    let db;
+    const request = indexedDB.open("KwitansiAppDB", 1);
+
+    request.onupgradeneeded = function(event) {
+        db = event.target.result;
+        if (!db.objectStoreNames.contains("draft")) db.createObjectStore("draft", { keyPath: "id" });
+        if (!db.objectStoreNames.contains("riwayat")) db.createObjectStore("riwayat", { keyPath: "id", autoIncrement: true });
+    };
+
+    request.onsuccess = function(event) {
+        db = event.target.result;
+        loadDraft(); 
+        loadHistoryList(); 
+    };
+
     function autoSaveDraft() {
         if (!db) return;
         const data = { id: 'current', signature: cvsIn.toDataURL() };
         fields.forEach(id => { data[id] = document.getElementById('input' + id).value; });
-        
-        const tx = db.transaction(["draft"], "readwrite");
-        tx.objectStore("draft").put(data);
+        db.transaction(["draft"], "readwrite").objectStore("draft").put(data);
     }
 
-    // 2. Muat Draft Saat Buka Aplikasi
     function loadDraft() {
         if (!db) return;
-        const tx = db.transaction(["draft"], "readonly");
-        const request = tx.objectStore("draft").get('current');
-        
-        request.onsuccess = function(e) {
+        const req = db.transaction(["draft"], "readonly").objectStore("draft").get('current');
+        req.onsuccess = function(e) {
             const data = e.target.result;
             if (data) {
                 fields.forEach(id => updateField(id, data[id]));
@@ -324,14 +349,14 @@
         };
     }
 
-    // 3. Simpan Ke Tabel Riwayat
+    // Simpan atau Edit Riwayat
     window.saveToHistory = function() {
         if (!db) return;
         const nama = document.getElementById('inputNama').value;
         const nominal = document.getElementById('inputNominal').value;
         
         if(!nama && !nominal) {
-            alert("Isi minimal Nama atau Nominal untuk menyimpan riwayat.");
+            showAppModal("Isi minimal Nama Pembayar atau Nominal untuk menyimpan riwayat.", false, null);
             return;
         }
 
@@ -342,24 +367,32 @@
         fields.forEach(id => { data[id] = document.getElementById('input' + id).value; });
 
         const tx = db.transaction(["riwayat"], "readwrite");
-        tx.objectStore("riwayat").add(data);
+        const store = tx.objectStore("riwayat");
+
+        if (editModeId) {
+            data.id = editModeId; // Update id yg ada
+            store.put(data);
+        } else {
+            store.add(data); // Simpan baru
+        }
+
         tx.oncomplete = function() {
-            alert("Kwitansi berhasil disimpan ke Riwayat!");
-            loadHistoryList();
+            showAppModal(editModeId ? "Perubahan riwayat berhasil disimpan!" : "Kwitansi baru berhasil disimpan ke Riwayat!", false, () => {
+                cancelEditMode();
+                loadHistoryList();
+            });
         };
     };
 
-    // 4. Tampilkan Daftar Riwayat
     function loadHistoryList() {
         if (!db) return;
         const listUl = document.getElementById('historyList');
         listUl.innerHTML = ''; 
 
-        const tx = db.transaction(["riwayat"], "readonly");
-        const store = tx.objectStore("riwayat");
-        const request = store.openCursor(null, "prev"); // Urutan dari terbaru
+        const store = db.transaction(["riwayat"], "readonly").objectStore("riwayat");
+        const req = store.openCursor(null, "prev"); // Urut terbaru
 
-        request.onsuccess = function(e) {
+        req.onsuccess = function(e) {
             const cursor = e.target.result;
             if (cursor) {
                 const data = cursor.value;
@@ -367,54 +400,91 @@
                 
                 const infoDiv = document.createElement('div');
                 infoDiv.className = 'history-info';
-                infoDiv.innerHTML = `<strong>${data.Nama || 'Tanpa Nama'} - Rp ${data.Nominal || '0'}</strong> 
-                                     Tgl: ${data.tanggal_simpan}`;
-                infoDiv.onclick = () => loadHistoryItem(data);
+                infoDiv.innerHTML = `<strong>${data.Nama || 'Tanpa Nama'} - Rp ${data.Nominal || '0'}</strong> Tgl: ${data.tanggal_simpan}`;
 
+                const actionDiv = document.createElement('div');
+                actionDiv.className = 'history-actions';
+
+                // Tombol Edit
+                const editBtn = document.createElement('button');
+                editBtn.className = 'btn-mini btn-edit';
+                editBtn.innerText = '✏️ Edit';
+                editBtn.onclick = () => loadHistoryForEdit(data, cursor.primaryKey);
+
+                // Tombol Hapus
                 const delBtn = document.createElement('button');
-                delBtn.className = 'btn-del-history';
-                delBtn.innerText = 'Hapus';
+                delBtn.className = 'btn-mini btn-del';
+                delBtn.innerText = '🗑️ Hapus';
                 delBtn.onclick = () => deleteHistoryItem(cursor.primaryKey);
 
+                actionDiv.appendChild(editBtn);
+                actionDiv.appendChild(delBtn);
                 li.appendChild(infoDiv);
-                li.appendChild(delBtn);
+                li.appendChild(actionDiv);
                 listUl.appendChild(li);
                 
                 cursor.continue();
             } else if (listUl.innerHTML === '') {
-                listUl.innerHTML = '<li style="color:#777; text-align:center; display:block;">Belum ada riwayat tersimpan</li>';
+                listUl.innerHTML = '<li style="color:#777; text-align:center; padding: 20px 0;">Belum ada riwayat tersimpan</li>';
             }
         };
     }
 
-    // 5. Muat Satu Riwayat ke Form
-    function loadHistoryItem(data) {
-        if(confirm("Muat riwayat ini ke form? Inputan saat ini akan tertimpa.")){
-            fields.forEach(id => updateField(id, data[id]));
+    // Aksi Tombol Edit Riwayat
+    function loadHistoryForEdit(data, id) {
+        showAppModal("Muat data ini ke form? Isian Anda saat ini akan tertimpa.", true, () => {
+            fields.forEach(fid => updateField(fid, data[fid]));
             loadSignatureImage(data.signature);
-            autoSaveDraft(); // Update draft dengan data riwayat yang dipanggil
-        }
+            autoSaveDraft(); 
+            
+            // Ubah mode ke Edit
+            editModeId = id;
+            document.getElementById('editBadge').style.display = 'block';
+            document.getElementById('btnSaveRecord').innerHTML = '💾 Simpan Perubahan';
+            
+            // Scroll otomatis ke atas
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
     }
 
-    // 6. Hapus Riwayat
     function deleteHistoryItem(id) {
-        if(confirm("Yakin ingin menghapus riwayat ini?")){
+        showAppModal("Yakin ingin menghapus riwayat kwitansi ini permanen?", true, () => {
             const tx = db.transaction(["riwayat"], "readwrite");
             tx.objectStore("riwayat").delete(id);
             tx.oncomplete = function() { loadHistoryList(); };
-        }
+        });
     }
 
-    // --- FITUR FULL SCREEN ---
-    window.openFullScreen = function() {
-        document.getElementById('previewSection').classList.add('fullscreen-mode');
+    // --- FITUR DOWNLOAD JPG HD ---
+    window.downloadHD = function() {
+        const btn = document.getElementById('btnDownload');
+        const originalText = btn.innerHTML;
+        btn.innerHTML = '⏳ Memproses...';
+        btn.disabled = true;
+
+        const targetEl = document.getElementById('kwitansiTarget');
+        
+        // Menggunakan library html2canvas dengan skala tinggi (scale 3 = resolusi HD)
+        html2canvas(targetEl, { 
+            scale: 3, 
+            useCORS: true, 
+            backgroundColor: null 
+        }).then(canvas => {
+            const link = document.createElement('a');
+            const noKwitansi = document.getElementById('inputNo').value || 'TanpaNomor';
+            link.download = `Kwitansi_${noKwitansi}.jpg`;
+            link.href = canvas.toDataURL('image/jpeg', 1.0); // 1.0 adalah Kualitas Maksimal JPG
+            link.click();
+            
+            btn.innerHTML = originalText;
+            btn.disabled = false;
+        }).catch(err => {
+            console.error(err);
+            showAppModal("Gagal mengekspor gambar.", false, null);
+            btn.innerHTML = originalText;
+            btn.disabled = false;
+        });
     }
-    window.closeFullScreen = function() {
-        document.getElementById('previewSection').classList.remove('fullscreen-mode');
-    }
-    document.addEventListener('keydown', function(event) {
-        if (event.key === "Escape") closeFullScreen();
-    });
 </script>
 
 </body>
