@@ -1,0 +1,16 @@
+{
+  "name": "Aplikasi Kwitansi Pro",
+  "short_name": "Kwitansi",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#f4f7f6",
+  "theme_color": "#0056b3",
+  "description": "Aplikasi pembuat kwitansi presisi dengan riwayat dan dukungan HD.",
+  "icons": [
+    {
+      "src": "logo.png",
+      "sizes": "192x192 512x512 any",
+      "type": "image/png"
+    }
+  ]
+}
