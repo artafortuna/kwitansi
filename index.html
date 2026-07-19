@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aplikasi Pembuat Kwitansi</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Bagian Form Input -->
+        <div class="form-section">
+            <h2>Data Kwitansi</h2>
+            <form id="kwitansiForm">
+                <label for="inputNo">No:</label>
+                <input type="text" id="inputNo" placeholder="Contoh: 001/INV/2026">
+
+                <label for="inputNama">Telah terima dari:</label>
+                <input type="text" id="inputNama" placeholder="Nama Pembayar">
+
+                <label for="inputTerbilang">Uang sejumlah (Terbilang):</label>
+                <textarea id="inputTerbilang" rows="2" placeholder="Satu Juta Lima Ratus Ribu Rupiah"></textarea>
+
+                <label for="inputUntuk">Untuk pembayaran:</label>
+                <textarea id="inputUntuk" rows="3" placeholder="Pembayaran sewa alat bulan Juli"></textarea>
+
+                <label for="inputNominal">Nominal Rp:</label>
+                <input type="text" id="inputNominal" placeholder="1.500.000">
+
+                <label for="inputTanggal">Tempat, Tanggal:</label>
+                <input type="text" id="inputTanggal" placeholder="Surabaya, 19 Juli 2026">
+
+                <label for="inputPenerima">Nama Penerima:</label>
+                <input type="text" id="inputPenerima" placeholder="Nama Anda / Stempel">
+            </form>
+            <button onclick="window.print()">Cetak / Simpan PDF</button>
+        </div>
+
+        <!-- Bagian Preview Kwitansi -->
+        <div class="preview-section">
+            <div id="kwitansiContainer" class="kwitansi-container">
+                <!-- Memanggil gambar yang Anda sebutkan -->
+                <img src="1000325967.jpg" alt="Blank Kwitansi" id="kwitansiBg">
+                
+                <!-- Teks yang akan ditumpuk di atas gambar -->
+                <div id="textNo" class="overlay-text"></div>
+                <div id="textNama" class="overlay-text"></div>
+                <div id="textTerbilang" class="overlay-text"></div>
+                <div id="textUntuk" class="overlay-text"></div>
+                <div id="textNominal" class="overlay-text"></div>
+                <div id="textTanggal" class="overlay-text"></div>
+                <div id="textPenerima" class="overlay-text"></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

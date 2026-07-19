@@ -1,0 +1,163 @@
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f4f7f6;
+    margin: 0;
+    padding: 20px;
+}
+
+.container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 30px;
+}
+
+/* --- Area Form --- */
+.form-section {
+    flex: 1;
+    min-width: 300px;
+    max-width: 400px;
+    background: white;
+    padding: 25px;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+.form-section form {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.form-section label {
+    font-weight: 600;
+    font-size: 14px;
+    color: #333;
+}
+
+.form-section input, .form-section textarea {
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-family: inherit;
+    resize: vertical;
+}
+
+button {
+    margin-top: 20px;
+    padding: 12px;
+    background-color: #0056b3;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: bold;
+    width: 100%;
+}
+
+button:hover {
+    background-color: #004494;
+}
+
+/* --- Area Preview Kwitansi --- */
+.preview-section {
+    flex: 2;
+    min-width: 700px;
+    overflow-x: auto;
+}
+
+.kwitansi-container {
+    position: relative;
+    width: 800px; /* Ukuran lebar tetap agar posisi persentase stabil */
+    display: inline-block;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+}
+
+.kwitansi-container img {
+    width: 100%;
+    height: auto;
+    display: block;
+}
+
+/* Styling dasar untuk teks di atas gambar menggunakan Comic Sans */
+.overlay-text {
+    position: absolute;
+    font-family: 'Comic Sans MS', 'Comic Sans', cursive; /* Mengubah font ke Comic Sans */
+    color: #1a1a1a;
+    /* border: 1px solid red; /* (Opsional: hapus tanda /* di awal baris ini jika ingin melihat kotak batas teks untuk kalibrasi) */
+}
+
+/* Pengaturan Presisi: Ukuran Font, Spasi, dan Koordinat */
+
+#textNo { 
+    top: 10.5%; 
+    left: 24%; 
+    font-size: 15px; 
+}
+
+#textNama { 
+    top: 21%; 
+    left: 37.5%; 
+    width: 57%; 
+    font-size: 16px; 
+}
+
+/* Area Terbilang: menggunakan line-height agar jika teks panjang (2 baris), 
+   baris keduanya akan pas jatuh di garis bawahnya */
+#textTerbilang { 
+    top: 31%; 
+    left: 34%; 
+    width: 61%; 
+    font-size: 15px; 
+    line-height: 2.15; /* Mengatur jarak antar baris teks agar pas dengan garis kwitansi */
+} 
+
+/* Area Untuk Pembayaran: sama seperti terbilang, disesuaikan untuk 3 baris */
+#textUntuk { 
+    top: 41.5%; 
+    left: 39%; 
+    width: 56%; 
+    font-size: 15px; 
+    line-height: 2.15; 
+} 
+
+#textNominal { 
+    top: 80.5%; 
+    left: 26%; 
+    font-size: 18px; /* Dibuat lebih besar agar memenuhi kotak Rp. */
+    font-weight: bold; /* Angka nominal ditebalkan */
+    letter-spacing: 1.5px; 
+}
+
+#textTanggal { 
+    top: 67%; 
+    left: 69%; 
+    width: 26%; 
+    font-size: 14px; 
+    text-align: center; 
+}
+
+#textPenerima { 
+    top: 88%; 
+    left: 69%; 
+    width: 26%; 
+    font-size: 15px; 
+    font-weight: bold;
+    text-align: center; 
+}
+
+/* Mode Print: Hanya mencetak bagian kwitansi */
+@media print {
+    body * {
+        visibility: hidden;
+    }
+    .kwitansi-container, .kwitansi-container * {
+        visibility: visible;
+    }
+    .kwitansi-container {
+        position: absolute;
+        left: 0;
+        top: 0;
+        box-shadow: none;
+    }
+}
