@@ -42,7 +42,39 @@ body {
     resize: vertical;
 }
 
-button {
+/* Area Input Tanda Tangan */
+.signature-input-container {
+    border: 1px solid #ddd;
+    background-color: #fcfcfc;
+    border-radius: 5px;
+    padding: 5px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+#canvasSignatureInput {
+    border: 1px solid #ddd;
+    border-radius: 3px;
+    cursor: crosshair; /* Pointer khusus untuk menggambar */
+}
+
+.btn-clear {
+    margin-top: 5px;
+    padding: 6px 12px;
+    background-color: #f44336;
+    color: white;
+    border: none;
+    border-radius: 3px;
+    cursor: pointer;
+    font-size: 12px;
+}
+
+.btn-clear:hover {
+    background-color: #d32f2f;
+}
+
+.btn-print {
     margin-top: 20px;
     padding: 12px;
     background-color: #0056b3;
@@ -55,7 +87,7 @@ button {
     width: 100%;
 }
 
-button:hover {
+.btn-print:hover {
     background-color: #004494;
 }
 
@@ -79,71 +111,83 @@ button:hover {
     display: block;
 }
 
-/* Styling dasar untuk teks di atas gambar menggunakan Comic Sans */
+/* Styling dasar untuk teks di atas gambar */
 .overlay-text {
     position: absolute;
-    font-family: 'Comic Sans MS', 'Comic Sans', cursive; /* Mengubah font ke Comic Sans */
+    font-size: 16px;
     color: #1a1a1a;
-    /* border: 1px solid red; /* (Opsional: hapus tanda /* di awal baris ini jika ingin melihat kotak batas teks untuk kalibrasi) */
+    font-weight: bold;
+    /* border: 1px solid red; /* Uncomment ini untuk debugging posisi */
 }
 
-/* Pengaturan Presisi: Ukuran Font, Spasi, dan Koordinat */
+/* Font Comic Sans untuk Hasil Pratinjau */
+.ComicSans {
+    font-family: 'Comic Sans MS', 'Comic Sans', cursive !important;
+}
+
+/* Pengaturan Presisi: Ukuran Font dan Koordinat */
+/* Koordinat top dan left dikalibrasi agar pas di atas garis pada gambar 1000325975.jpg */
 
 #textNo { 
-    top: 10.5%; 
-    left: 24%; 
+    top: 14.5%; /* Tepat di garis No. */
+    left: 27%; 
     font-size: 15px; 
 }
 
 #textNama { 
-    top: 21%; 
-    left: 37.5%; 
-    width: 57%; 
+    top: 23%; /* Tepat di garis Telah terima dari */
+    left: 43%; 
+    width: 55%; 
     font-size: 16px; 
 }
 
-/* Area Terbilang: menggunakan line-height agar jika teks panjang (2 baris), 
-   baris keduanya akan pas jatuh di garis bawahnya */
+/* Terbilang & Untuk Pembayaran menggunakan line-height agar pas dengan jarak antar garis */
 #textTerbilang { 
-    top: 31%; 
-    left: 34%; 
-    width: 61%; 
+    top: 31%; /* Tepat di garis Uang sejumlah */
+    left: 40%; 
+    width: 55%; 
     font-size: 15px; 
-    line-height: 2.15; /* Mengatur jarak antar baris teks agar pas dengan garis kwitansi */
+    line-height: 2.1; 
 } 
 
-/* Area Untuk Pembayaran: sama seperti terbilang, disesuaikan untuk 3 baris */
 #textUntuk { 
-    top: 41.5%; 
-    left: 39%; 
-    width: 56%; 
+    top: 42.5%; /* Tepat di garis Untuk pembayaran */
+    left: 42%; 
+    width: 53%; 
     font-size: 15px; 
-    line-height: 2.15; 
+    line-height: 2.1; 
 } 
 
 #textNominal { 
-    top: 80.5%; 
-    left: 26%; 
-    font-size: 18px; /* Dibuat lebih besar agar memenuhi kotak Rp. */
-    font-weight: bold; /* Angka nominal ditebalkan */
-    letter-spacing: 1.5px; 
+    top: 80.1%; /* Tepat di garis kotak Rp. */
+    left: 26.5%; 
+    font-size: 18px; /* Lebih besar */
 }
 
 #textTanggal { 
-    top: 67%; 
-    left: 69%; 
-    width: 26%; 
+    top: 68.5%; /* Tepat di atas garis tanggal */
+    left: 74%; 
+    width: 23%; 
     font-size: 14px; 
     text-align: center; 
 }
 
 #textPenerima { 
-    top: 88%; 
-    left: 69%; 
-    width: 26%; 
+    top: 88.5%; /* Tepat di atas garis nama penerima */
+    left: 74%; 
+    width: 23%; 
     font-size: 15px; 
-    font-weight: bold;
     text-align: center; 
+}
+
+/* Tanda Tangan di Pratinjau Kwitansi */
+.overlay-signature {
+    position: absolute;
+    top: 76%; /* Area kosong di atas nama penerima */
+    left: 71%; 
+    width: 20%; 
+    height: 12%; 
+    /* border: 1px solid blue; /* Uncomment untuk debugging posisi */
 }
 
 /* Mode Print: Hanya mencetak bagian kwitansi */
