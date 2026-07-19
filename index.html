@@ -3,10 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Aplikasi Kwitansi Otomatis</title>
-    
-    <!-- Memanggil font tulisan tangan cadangan dari Google Fonts agar pasti berhasil -->
-    <link href="https://fonts.googleapis.com/css2?family=Comic+Neue:wght@700&display=swap" rel="stylesheet">
+    <title>Aplikasi Kwitansi Presisi</title>
     
     <style>
         body {
@@ -50,27 +47,28 @@
         .kwitansi-container img { width: 100%; height: auto; display: block; }
         
         /* 
-           KUNCI PENGATURAN FONT: 
-           Dikunci menggunakan !important agar tidak bisa ditolak oleh browser.
-           Urutan: Coba Comic Sans lokal, jika gagal pakai Comic Neue dari internet.
+           PENYESUAIAN FONT & LETAK SESUAI GAMBAR 1000325927.jpg
         */
         .overlay-text {
             position: absolute; 
-            color: #1a1a1a; 
-            font-weight: bold;
-            font-family: 'Comic Sans MS', 'Comic Sans', 'Comic Neue', cursive !important;
+            color: #222; 
+            font-weight: 500; /* Ketebalan sedang sesuai gambar */
+            font-family: 'Calibri', 'Arial', sans-serif !important; /* Font formal standar */
+            /* border: 1px solid rgba(255,0,0,0.3); /* Hapus tanda /* di awal baris ini jika ingin cek kotak presisi */
         }
         
-        #textNo { top: 14.5%; left: 27%; font-size: 15px; }
-        #textNama { top: 23%; left: 43%; width: 55%; font-size: 16px; }
-        #textTerbilang { top: 31%; left: 40%; width: 55%; font-size: 15px; line-height: 2.1; } 
-        #textUntuk { top: 42.5%; left: 42%; width: 53%; font-size: 15px; line-height: 2.1; } 
-        #textNominal { top: 80.1%; left: 26.5%; font-size: 18px; }
-        #textTanggal { top: 68.5%; left: 74%; width: 23%; font-size: 14px; text-align: center; }
-        #textPenerima { top: 88.5%; left: 74%; width: 23%; font-size: 15px; text-align: center; }
+        /* Titik koordinat disetel ulang agar pas di garis gambar baru */
+        #textNo { top: 12%; left: 24.8%; font-size: 17px; }
+        #textNama { top: 20.8%; left: 39.8%; width: 55%; font-size: 17px; }
+        #textTerbilang { top: 29.8%; left: 39%; width: 55%; font-size: 17px; line-height: 2.1; } 
+        #textUntuk { top: 38.5%; left: 39.8%; width: 53%; font-size: 17px; line-height: 2.1; } 
+        #textNominal { top: 78%; left: 27%; font-size: 19px; font-weight: bold; }
+        #textTanggal { top: 60.5%; left: 69%; width: 26%; font-size: 15px; text-align: center; }
+        #textPenerima { top: 85.5%; left: 69%; width: 26%; font-size: 15px; text-align: center; }
         
+        /* Posisi Tanda Tangan diselipkan antara Tanggal dan Nama Penerima */
         #canvasPratinjau {
-            position: absolute; top: 72%; left: 71%; width: 28%; height: 16%; pointer-events: none;
+            position: absolute; top: 65%; left: 73%; width: 18%; height: 20%; pointer-events: none;
         }
 
         @media print {
@@ -86,13 +84,13 @@
     <div class="form-section">
         <h2>Data Kwitansi</h2>
         <form>
-            <label>No:</label> <input type="text" id="inputNo" placeholder="001/INV/2026">
-            <label>Telah terima dari:</label> <input type="text" id="inputNama" placeholder="Nama Pembayar">
-            <label>Uang sejumlah:</label> <textarea id="inputTerbilang" rows="2" placeholder="Satu Juta Rupiah"></textarea>
-            <label>Untuk pembayaran:</label> <textarea id="inputUntuk" rows="2" placeholder="Sewa alat"></textarea>
-            <label>Nominal Rp:</label> <input type="text" id="inputNominal" placeholder="1.000.000">
+            <label>No:</label> <input type="text" id="inputNo" placeholder="2026070001">
+            <label>Telah terima dari:</label> <input type="text" id="inputNama" placeholder="Mas Ferro">
+            <label>Uang sejumlah:</label> <textarea id="inputTerbilang" rows="2" placeholder="Lima Ratus Ribu Rupiah"></textarea>
+            <label>Untuk pembayaran:</label> <textarea id="inputUntuk" rows="2" placeholder="Angsuran pengembalian pinjaman..."></textarea>
+            <label>Nominal Rp:</label> <input type="text" id="inputNominal" placeholder="500.000,00">
             <label>Tempat, Tanggal:</label> <input type="text" id="inputTanggal" placeholder="Kediri, 19 Juli 2026">
-            <label>Nama Penerima:</label> <input type="text" id="inputPenerima" placeholder="Nama Anda">
+            <label>Nama Penerima:</label> <input type="text" id="inputPenerima" placeholder="Augustinus Sigit Prasetyo">
             
             <label>Tanda Tangan (Goreskan di sini):</label>
             <div class="signature-container">
@@ -105,7 +103,8 @@
 
     <div class="preview-section">
         <div class="kwitansi-container">
-            <img src="1000325975.jpg" alt="Blank Kwitansi">
+            <!-- Pastikan nama gambar di bawah ini sesuai -->
+            <img src="1000325927.jpg" alt="Blank Kwitansi">
             
             <div id="textNo" class="overlay-text"></div>
             <div id="textNama" class="overlay-text"></div>
@@ -121,6 +120,7 @@
 </div>
 
 <script>
+    // Menyalin ketikan secara real-time
     const fields = ['No', 'Nama', 'Terbilang', 'Untuk', 'Nominal', 'Tanggal', 'Penerima'];
     fields.forEach(id => {
         document.getElementById('input' + id).addEventListener('input', function() {
@@ -128,6 +128,7 @@
         });
     });
 
+    // Setup Canvas Tanda Tangan
     const cvsIn = document.getElementById('canvasInput');
     const ctxIn = cvsIn.getContext('2d');
     const cvsOut = document.getElementById('canvasPratinjau');
@@ -136,10 +137,11 @@
     let isDrawing = false;
     let lastX = 0, lastY = 0;
 
-    ctxIn.lineWidth = 3;
+    // Set tipe pulpen tanda tangan
+    ctxIn.lineWidth = 2; // Goresan disesuaikan agar mirip pulpen asli
     ctxIn.lineCap = 'round';
     ctxIn.lineJoin = 'round';
-    ctxIn.strokeStyle = '#000';
+    ctxIn.strokeStyle = '#000000';
 
     function draw(e) {
         if (!isDrawing) return;
@@ -160,6 +162,7 @@
         lastX = x;
         lastY = y;
 
+        // Salin ke pratinjau kwitansi
         ctxOut.clearRect(0, 0, cvsOut.width, cvsOut.height);
         ctxOut.drawImage(cvsIn, 0, 0);
     }
@@ -173,6 +176,7 @@
 
     function endDraw() { isDrawing = false; }
 
+    // Event listener untuk Mouse dan Layar Sentuh
     cvsIn.addEventListener('mousedown', startDraw);
     cvsIn.addEventListener('mousemove', draw);
     cvsIn.addEventListener('mouseup', endDraw);
@@ -181,6 +185,7 @@
     cvsIn.addEventListener('touchmove', draw, {passive: false});
     cvsIn.addEventListener('touchend', endDraw);
 
+    // Fungsi Hapus Tanda Tangan
     window.clearSignature = function() {
         ctxIn.clearRect(0, 0, cvsIn.width, cvsIn.height);
         ctxOut.clearRect(0, 0, cvsOut.width, cvsOut.height);
