@@ -15,23 +15,32 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
     <style>
+        /* --- PENYESUAIAN GLOBAL & MOBILE RESPONSIVE --- */
+        * {
+            box-sizing: border-box; /* Mencegah elemen meluber dari layar */
+        }
+        
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background-color: #f4f7f6;
             margin: 0;
             padding: 20px;
+            padding-bottom: 80px; /* Memberi ruang agar konten tidak tertutup footer */
         }
         .container {
             display: flex;
             flex-wrap: wrap;
-            gap: 30px;
+            gap: 20px;
+            width: 100%;
+            max-width: 1400px; /* Batas maksimal di layar PC besar */
+            margin: 0 auto;
         }
         
         /* Area Kiri (Form & Riwayat) */
         .left-panel {
             flex: 1;
             min-width: 320px;
-            max-width: 450px;
+            max-width: 100%; /* Diubah ke 100% agar responsif penuhi layar HP */
             display: flex;
             flex-direction: column;
             gap: 20px;
@@ -40,57 +49,85 @@
         .form-section {
             background: white;
             padding: 25px;
-            border-radius: 10px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05); /* Bayangan lebih halus/profesional */
             position: relative;
         }
         .form-section h2 { margin-top: 0; display: flex; justify-content: space-between; align-items: center;}
         
         .btn-clear-all {
-            background: #ffc107; color: #212529; border: none; padding: 6px 12px;
-            border-radius: 5px; cursor: pointer; font-size: 12px; font-weight: bold;
+            background: #ffc107; color: #212529; border: none; padding: 8px 14px;
+            border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: bold;
+            transition: all 0.2s ease;
         }
-        .btn-clear-all:hover { background: #e0a800; }
+        .btn-clear-all:hover { background: #e0a800; transform: translateY(-1px); }
 
-        .form-section form { display: flex; flex-direction: column; gap: 12px; }
-        .form-section label { font-weight: 600; font-size: 14px; color: #333; }
+        .form-section form { display: flex; flex-direction: column; gap: 14px; }
+        .form-section label { font-weight: 600; font-size: 14px; color: #444; }
         .form-section input, .form-section textarea {
-            padding: 10px; border: 1px solid #ccc; border-radius: 5px; font-family: inherit; resize: vertical;
+            padding: 12px; border: 1px solid #d1d5db; border-radius: 6px; font-family: inherit; resize: vertical;
+            width: 100%; transition: border-color 0.3s, box-shadow 0.3s;
+        }
+        /* Efek profesional saat form di-klik/fokus */
+        .form-section input:focus, .form-section textarea:focus {
+            border-color: #007bff;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.15);
         }
         
         .signature-container {
-            display: flex; flex-direction: column; align-items: center; gap: 10px;
-            border: 1px solid #ccc; padding: 10px; border-radius: 5px; background: #fafafa;
+            display: flex; flex-direction: column; align-items: center; gap: 12px;
+            border: 1px solid #d1d5db; padding: 15px; border-radius: 6px; background: #fafafa;
         }
         #canvasInput {
-            border: 1px dashed #999; background: white; cursor: crosshair; touch-action: none; width: 100%; max-width: 300px;
+            border: 2px dashed #bbb; background: white; cursor: crosshair; touch-action: none; width: 100%; max-width: 300px;
+            border-radius: 4px; transition: border-color 0.2s ease;
         }
-        .btn-clear-sig { background: #6c757d; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 12px;}
+        #canvasInput:active { border-color: #007bff; }
+        .btn-clear-sig { background: #6c757d; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 12px; transition: background 0.2s ease;}
+        .btn-clear-sig:hover { background: #5a6268; }
         
-        .btn-group { display: flex; flex-direction: column; gap: 10px; margin-top: 20px; }
-        .btn-row { display: flex; gap: 10px; }
-        .btn-action { color: white; border: none; padding: 12px; border-radius: 5px; cursor: pointer; font-size: 14px; font-weight: bold; flex: 1; display: flex; justify-content: center; align-items: center; gap: 5px;}
-        .btn-save { background: #28a745; } .btn-save:hover { background: #218838; }
-        .btn-download { background: #007bff; } .btn-download:hover { background: #0069d9; }
-        .edit-badge { background: #17a2b8; color: white; padding: 4px 8px; border-radius: 4px; font-size: 11px; display: none; align-self: flex-start; margin-bottom: 5px;}
+        .btn-group { display: flex; flex-direction: column; gap: 10px; margin-top: 25px; }
+        .btn-row { display: flex; gap: 12px; }
+        .btn-action { color: white; border: none; padding: 14px; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: bold; flex: 1; display: flex; justify-content: center; align-items: center; gap: 6px; transition: all 0.2s ease;}
+        .btn-save { background: #28a745; box-shadow: 0 2px 6px rgba(40, 167, 69, 0.3); } 
+        .btn-save:hover { background: #218838; transform: translateY(-2px); box-shadow: 0 4px 10px rgba(40, 167, 69, 0.4); }
+        .btn-download { background: #007bff; box-shadow: 0 2px 6px rgba(0, 123, 255, 0.3); } 
+        .btn-download:hover { background: #0069d9; transform: translateY(-2px); box-shadow: 0 4px 10px rgba(0, 123, 255, 0.4); }
+        .edit-badge { background: #17a2b8; color: white; padding: 6px 10px; border-radius: 6px; font-size: 12px; display: none; align-self: flex-start; margin-bottom: 10px; font-weight: 600;}
         
         /* Area Riwayat */
         .history-section {
-            background: white; padding: 20px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05);
         }
-        .history-section h3 { margin-top: 0; font-size: 16px; border-bottom: 2px solid #eee; padding-bottom: 10px;}
-        .history-list { list-style: none; padding: 0; margin: 0; max-height: 250px; overflow-y: auto; }
-        .history-list li { background: #f8f9fa; margin-bottom: 8px; padding: 10px; border-radius: 5px; border: 1px solid #ddd; display: flex; flex-direction: column; gap: 8px;}
-        .history-info { font-size: 13px; color: #555;}
-        .history-info strong { display: block; font-size: 14px; color: #0056b3;}
-        .history-actions { display: flex; gap: 5px; justify-content: flex-end;}
-        .btn-mini { padding: 5px 10px; border-radius: 3px; cursor: pointer; font-size: 11px; border: none; color: white; font-weight: bold;}
-        .btn-edit { background: #ffc107; color: #212529; }
-        .btn-del { background: #dc3545; }
+        .history-section h3 { margin-top: 0; font-size: 16px; border-bottom: 2px solid #f0f0f0; padding-bottom: 12px; color: #333;}
+        .history-list { list-style: none; padding: 0; margin: 0; max-height: 300px; overflow-y: auto; }
+        .history-list::-webkit-scrollbar { width: 6px; }
+        .history-list::-webkit-scrollbar-thumb { background: #ccc; border-radius: 3px; }
+        .history-list li { background: #f8f9fa; margin-bottom: 10px; padding: 12px; border-radius: 8px; border: 1px solid #eaeaea; display: flex; flex-direction: column; gap: 10px; transition: border-color 0.2s ease;}
+        .history-list li:hover { border-color: #cbd5e1; }
+        .history-info { font-size: 13px; color: #666; line-height: 1.4;}
+        .history-info strong { display: block; font-size: 15px; color: #0056b3; margin-bottom: 3px;}
+        .history-actions { display: flex; gap: 8px; justify-content: flex-end;}
+        .btn-mini { padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 11px; border: none; color: white; font-weight: bold; transition: all 0.2s ease;}
+        .btn-edit { background: #ffc107; color: #212529; } .btn-edit:hover { background: #e0a800; }
+        .btn-del { background: #dc3545; } .btn-del:hover { background: #c82333; }
         
         /* Area Kanan (Pratinjau) */
-        .preview-section { flex: 2; min-width: 700px; overflow-x: auto; position: relative; }
-        .kwitansi-container { position: relative; width: 800px; display: inline-block; box-shadow: 0 4px 10px rgba(0,0,0,0.15); background: white; }
+        .preview-section { 
+            flex: 2; 
+            width: 100%; 
+            max-width: 100%; 
+            overflow-x: auto; 
+            position: relative; 
+            border-radius: 12px;
+            /* Scrollbar responsif untuk HP */
+            padding-bottom: 10px; 
+        }
+        .preview-section::-webkit-scrollbar { height: 8px; }
+        .preview-section::-webkit-scrollbar-thumb { background: #b0b0b0; border-radius: 4px; }
+        
+        .kwitansi-container { position: relative; width: 800px; display: inline-block; box-shadow: 0 8px 25px rgba(0,0,0,0.12); background: white; border-radius: 4px; overflow: hidden;}
         .kwitansi-container img { width: 100%; height: auto; display: block; }
         
         /* --- PENGATURAN FONT & LETAK MICRO-ADJUSTMENT --- */
@@ -104,26 +141,12 @@
         }
         
         #textNo { top: 9.5%; left: 25.2%; font-size: 18px; } 
-        
-        /* TELAH TERIMA DARI: Diturunkan duikit */
         #textNama { top: 17.8%; left: 40.2%; width: 55%; font-size: 18px; }
-        
         #textTerbilang { top: 27.5%; left: 40.2%; width: 55%; font-size: 18px; line-height: 1.95; } 
-        
-        /* UNTUK PEMBAYARAN: Diturunkan duikit */
         #textUntuk { top: 36.3%; left: 40.2%; width: 53%; font-size: 18px; line-height: 1.95; } 
-        
         #textNominal { top: 79.5%; left: 29.8%; font-size: 20px; font-weight: bold; }
-        
-        /* TANGGAL: Diturunkan dikit */
-        #textTanggal { 
-            top: 60.5%; left: 66.5%; width: 26%; font-size: 16px; text-align: center; 
-            transform-origin: center bottom; 
-        }
-        #textPenerima { 
-            top: 85.5%; left: 66.5%; width: 26%; font-size: 16px; text-align: center; 
-            transform-origin: center bottom; 
-        }
+        #textTanggal { top: 60.5%; left: 66.5%; width: 26%; font-size: 16px; text-align: center; transform-origin: center bottom; }
+        #textPenerima { top: 85.5%; left: 66.5%; width: 26%; font-size: 16px; text-align: center; transform-origin: center bottom; }
         
         #canvasPratinjau {
             position: absolute; top: 65%; left: 70.5%; width: 18%; height: 20%; pointer-events: none;
@@ -132,21 +155,46 @@
         /* --- CUSTOM MODAL POPUP --- */
         .modal-overlay {
             position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.6);
-            display: none; align-items: center; justify-content: center; z-index: 9999; backdrop-filter: blur(3px);
-            opacity: 0; transition: opacity 0.2s ease;
+            display: none; align-items: center; justify-content: center; z-index: 9999; backdrop-filter: blur(4px);
+            opacity: 0; transition: opacity 0.3s ease;
         }
         .modal-box {
-            background: white; padding: 25px; border-radius: 12px; width: 90%; max-width: 350px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3); text-align: center; transform: translateY(20px); transition: transform 0.2s ease;
+            background: white; padding: 30px 25px; border-radius: 16px; width: 90%; max-width: 380px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.25); text-align: center; transform: translateY(30px); transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
         .modal-overlay.active { opacity: 1; display: flex; }
         .modal-overlay.active .modal-box { transform: translateY(0); }
-        .modal-msg { margin: 0 0 20px 0; font-size: 15px; color: #333; line-height: 1.5; }
-        .modal-btns { display: flex; gap: 10px; justify-content: center; }
-        .btn-modal { padding: 10px 20px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 14px; flex: 1;}
+        .modal-msg { margin: 0 0 25px 0; font-size: 16px; color: #444; line-height: 1.6; }
+        .modal-btns { display: flex; gap: 12px; justify-content: center; }
+        .btn-modal { padding: 12px 20px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 14px; flex: 1; transition: all 0.2s ease;}
         .btn-modal-cancel { background: #e9ecef; color: #495057; } .btn-modal-cancel:hover { background: #dde2e6; }
-        .btn-modal-ok { background: #0056b3; color: white; } .btn-modal-ok:hover { background: #004494; }
+        .btn-modal-ok { background: #0056b3; color: white; box-shadow: 0 2px 6px rgba(0, 86, 179, 0.3);} .btn-modal-ok:hover { background: #004494; }
 
+        /* --- FOOTER MELAYANG --- */
+        .floating-footer {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(8px);
+            color: #555;
+            text-align: center;
+            padding: 15px 20px;
+            font-size: 13px;
+            font-weight: 500;
+            border-top: 1px solid #eaeaea;
+            box-shadow: 0 -4px 15px rgba(0, 0, 0, 0.06);
+            z-index: 1000;
+        }
+
+        /* --- MEDIA QUERY KHUSUS HP --- */
+        @media (max-width: 768px) {
+            body { padding: 15px; padding-bottom: 90px; }
+            .container { flex-direction: column; gap: 20px; }
+            .left-panel, .preview-section { flex: none; width: 100%; }
+            .btn-row { flex-direction: column; }
+        }
     </style>
 </head>
 <body>
@@ -213,6 +261,11 @@
             <button class="btn-modal btn-modal-ok" id="modalBtnOk">OK</button>
         </div>
     </div>
+</div>
+
+<!-- Footer Melayang -->
+<div class="floating-footer">
+    &copy; 2026 Aplikasi Kwitansi Pro - Hak Cipta Dilindungi
 </div>
 
 <script>
