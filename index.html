@@ -194,6 +194,19 @@
             .container { flex-direction: column; gap: 20px; }
             .left-panel, .preview-section { flex: none; width: 100%; }
             .btn-row { flex-direction: column; }
+            
+            /* --- EFEK TINTA TEBAL & NATURAL DI HP --- */
+            .overlay-text {
+                -webkit-text-stroke: 0.6px #222; /* Membuat tulisan menjadi tebal */
+                text-shadow: 0px 0px 1.5px rgba(34, 34, 34, 0.4); /* Efek blur tipis layaknya tinta meresap/mbleber ke serat kertas */
+                mix-blend-mode: multiply; /* Efek menyatukan warna font dengan tekstur background kwitansi */
+                opacity: 0.92; /* Tinta tidak 100% solid karena terserap kertas */
+            }
+            
+            #canvasPratinjau {
+                mix-blend-mode: multiply; /* Efek tinta menyatu dengan kertas untuk tanda tangan */
+                opacity: 0.92;
+            }
         }
     </style>
 </head>
